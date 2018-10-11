@@ -1,0 +1,44 @@
+import pip
+pip.main(['install','pyaudio'])
+
+
+#python -m speech_recognition
+
+import speech_recognition as sr
+sr.__version__
+
+r = sr.Recognizer()
+harvard = sr.AudioFile("C:\\Users\\rimanshu\\Downloads\\harvard.wav")
+with harvard as source:
+    audio1 = r.record(source, duration=4) # stops the recording after a specified number of seconds. 
+    audio2 = r.record(source,offset=4, duration=4) #the number of seconds from the beginning of the file to ignore before starting to record.
+
+type(audio)
+
+r.recognize_google(audio1, show_all=True)
+r.recognize_google(audio2)
+
+#Audio with noise 
+
+with jackhammer as source:
+    r.adjust_for_ambient_noise(source, duration=0.5) #noise 
+    audio = r.record(source)
+
+r.recognize_google(audio)
+
+############# Microphone Audio #################
+
+import speech_recognition as sr
+r = sr.Recognizer()
+
+mic = sr.Microphone()
+#mic =sr.Microphone.list_microphone_names(device_index=3) #Lsit of mic listed #if you wanted to run index 3 microphone
+
+with mic as source:
+    r.adjust_for_ambient_noise(source, duration=0.1)
+    audio = r.listen(source)
+    audio_back = r.listen_in_background(source, callback="Recognizer")
+    
+#help(r.listen_in_background)
+r.recognize_google(audio,language="pa-IN")
+r.recognize_google(audio_back, language="hi-IN")
