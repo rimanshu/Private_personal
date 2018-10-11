@@ -1,0 +1,99 @@
+#Hello Word program for beginner...
+print('Hello World')
+
+# Main Function in Python
+def main():
+	x,y =2,8
+	
+def main():
+    print('Hello World')
+if __name__ == "__main__":
+    main()
+
+print('Guru99')
+
+# Python supports two types of numbers - integers and floating point numbers
+int= 8
+print(int)
+type(int) #type of data structure
+float = 3.4
+print(float)
+my = float(7)
+print(my)
+mystring = 'hello'
+print(mystring)
+mystring = "hello"
+print(mystring)
+
+
+# String functions 
+a="Guru"
+b = 99
+print(a+str(b))
+
+oldstring = 'I like Guru99' 
+newstring = oldstring.replace('like', 'love')
+print(newstring)
+
+string="python at guru99"
+print(string.upper())
+print(":".join("Python"))
+
+word="guru99 career guru99"
+First, Middle, Last = word.split('')
+print(word.split(' '))
+print(First,Middle,Last)
+
+#Slicing 
+var1 = "Guru99!"
+var2 = "Software Development"
+print ("var1[0]:",var1[0])
+print ("var2[1:5]:",var2[1:5])
+
+x = "Hello World!"
+print(x[:6])
+print(x[0:6] + "Guru99")
+
+help(max)
+help(input)
+
+# Lists are very similar to arrays
+[start:end][inclusive:exclusive]
+mylist = []
+mylist.append(1)
+mylist.append(2)
+print(mylist[0]) # prints 1
+print(mylist[1]) # prints 2
+print(mylist[-1]) # prints 2
+set() #remove the duplicates or provide the unique elements 
+
+hall=10 and kit = 25 and .....etc
+areas = ["hallway",hall, "kitchen",kit, "living room", liv, "bedroom",bed, "bathroom", bath]
+del(area[2])
+
+
+# prints out 1,2,3
+for x in mylist:
+    print(x)
+
+#Tuple - tuple is declared in parentheses and cannot be changed
+x = ("Guru99", 20, "Education")    # tuple packing
+(company, emp, profile) = x    # tuple unpacking
+print(company)
+print(emp)
+print(x[1:2])
+#Important note - Since tuples are hashable, and list is not,
+#we must use tuple as the key if we need to create a composite key to use in a dictionary.
+
+
+#Loops and Conditional Statements read from guru99
+https://www.guru99.com/python-loops-while-for-break-continue-enumerate.html
+
+for i in range(10):
+    print(i, end =',')
+print()
+
+counter =3
+while counter >0:
+    print("Count Down Starts:",counter)
+    counter -=1

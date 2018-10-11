@@ -1,0 +1,60 @@
+
+#Clases and Objects
+class myClass():
+  def method1(self):
+      print("Guru99")
+        
+  def method2(self,someString):    
+      print("Software Testing:" + someString)
+#Drieved class
+class childClass(myClass):
+  #def method1(self):
+        #myClass.method1(self);
+        #print "Child Class Method1" 
+        
+  def method2(self):
+        print("childClass method2")     
+         
+def main():           
+  # exercise the class methods
+  c2 = childClass()
+  c2.method1()
+  c2.method2()
+
+if __name__== "__main__":
+  main()
+  
+#Constructor 
+
+class User:
+    name = ""
+
+    def __init__(self, name):
+        self.name = name
+
+    def sayHello(self):
+        print("Welcome to Guru99, " + self.name)
+
+User1 = User("Alex")
+User1.sayHello()
+
+#Play with files 
+def main():
+     f= open("guru99.txt","w+")
+     #f=open("guru99.txt","a+")
+     for i in range(10):
+         f.write("This is line %d\r\n" % (i+1))
+     f.close()   
+     #Open the file back and read the contents
+     #f=open("guru99.txt", "r")
+     #   if f.mode == 'r': 
+     #     contents =f.read()
+     #     print contents
+     #or, readlines reads the individual line into a list
+     #fl =f.readlines()
+     #for x in fl:
+     #print x
+if __name__== "__main__":
+  main()
+
+
