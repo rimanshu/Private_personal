@@ -1,0 +1,12 @@
+1) https://github.com/rimanshu/movie-review-sentiment-analysis-using-NLP-Scikitlearn/blob/master/movie%20review%20sentiment%20analysis.ipynb
+2) https://github.com/rimanshu/Multi-Class-Text-Classification----Random-Forest/blob/master/multi-class-classifier.ipynb
+3) https://github.com/rimanshu/Machine-Learning-with-Python/blob/master/Consumer_complaints.ipynb
+4) https://github.com/rimanshu/TimeSeriesAnalysisWithPython
+5) https://github.com/rimanshu/Market-Basket-Analysis/blob/master/Market-Basket%20Analysis%20-%20Apriori%20%26%20Association%20Rules.ipynb
+6) https://github.com/rimanshu/thesemicolon
+7) https://github.com/rimanshu/Predictive_Maintenance_using_Machine-Learning_Microsoft_Casestudy
+8) https://github.com/rimanshu/Customer_segmentation/blob/master/Cust_segmentation_online_retail.ipynb - Very difficult
+9) https://github.com/rimanshu/NaiveBayesClassification_TextAnalytics - NLP good project
+10) https://github.com/rimanshu/MLProjects/tree/master/Predict%20Customer%20Happiness
+11) https://github.com/rimanshu/machine-learning-case-studies - quora and stack over flow
+12)https://github.com/rimanshu/PythonDataScienceHandbook/tree/master/notebooks --- very Very Important
