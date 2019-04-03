@@ -1,0 +1,59 @@
+Best blog for gini index and entropy - 
+
+https://www.bogotobogo.com/python/scikit-learn/scikt_machine_learning_Decision_Tree_Learning_Informatioin_Gain_IG_Impurity_Entropy_Gini_Classification_Error.php
+
+In python
+from fancyimpute import KNN    
+
+# Use 5 nearest rows which have a feature to fill in each row's missing features
+knnOutput = KNN(k=5).complete(mydata)
+
+FKJA98XRVCZT
+
+parameters of algoriths
+
+
+-------------------------------------------------------------------------
+
+higue valume in python, duplicates in pandas, cheetsheet for pandas, SVM, KNN< Kmeans, Boosting, Naive baise, Gridsearch, Feature scalling and all and 3 use cases.
+
+
+daskDF = ddf.read_sql_table('testtable', connString, index_col='uid',
+    columns=['uid', sa.sql.column('datetime').cast(sa.types.String).label('datet??ime')])
+
+dd.from_pandas - to convert pandas to dask
+
+tp = pd.read_csv('Check1_900.csv', sep='\t', iterator=True, chunksize=1000)
+ 
+
+https://www.kaggle.com/grroverpr/pandas-cheatsheet
+duplicated,sorted, drop_duplicate, unique, astypes(), dtypes, notnull(), rename
+df.nunique() # unique value for each variable
+# first 3 rows of all columns which have all not null values
+df.loc[:,(df.notnull().all() )][:3]
+#for atleat one null value - any()
+
+# filter all rows which have Age > Passenger ID
+df.query('Age > PassengerId') or filter function we can also use  df.filter(like = 'ed', axis=1)[:2]
+
+# how=any -> row with any column = NA
+
+df.dropna(axis=0,  how='any').shape
+data1.merge(data2, how='inner', on='x1')
+
+to_datetime() -> convert whatever format argument to datetime (obviously that can be parsed to datetime)
+date_range() -> generates datetime data
+Datetimeindex -> datetypeindex data
+
+pd.date_range('2018-4-18', periods=6, freq='d')
+
+str.upper()/lower() to convert string into upper or lower case
+str.len() to find the length of sting
+str.strip()/lstrip()/rstrip() to strip spaces
+str.replace() to replace anything from string
+str.split() to split words of string or using some other delimiter
+str.get() to access elements in slit list
+str.resplit() spit in reverse order of string based on some delimiter
+str.extract() extract specific thing from string. alphabet or number
+
+

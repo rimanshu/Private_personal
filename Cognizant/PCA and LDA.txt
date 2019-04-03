@@ -1,0 +1,72 @@
+https://stackabuse.com/implementing-lda-in-python-with-scikit-learn/
+
+https://medium.com/journey-2-artificial-intelligence/lda-linear-discriminant-analysis-using-python-2155cf5b6398
+
+PCA takes a dataset with lot of dimention  i.e lot of cells and flatten into the 2 or 3 dimention so we can look into it.
+
+Both PCA and LDA are linear transformation techniques. However, PCA is an unsupervised while LDA is a supervised dimensionality reduction technique.
+
+PCA has no concern with the class labels. In simple words, PCA summarizes the feature set without relying on the output. PCA tries to find the directions of the maximum variance in the dataset. In a large feature set, there are many features that are merely duplicate of the other features or have a high correlation with the other features. Such features are basically redundant and can be ignored. The role of PCA is to find such highly correlated or duplicate features and to come up with a new feature set where there is minimum correlation between the features or in other words feature set with maximum variance between the features. Since the variance between the features doesn't depend upon the output, therefore PCA doesn't take the output labels into account.
+
+LDA is same as PCa but it works on maximize the mean of two groups and minimize the variance that is scatter.
+
+the added advantage LDA gives over PCA is to tackle overfitting.
+
+Unlike PCA, standardization of the data is not needed in LDA as it doesn’t affect the output. The reason why there’s no effect of standardization on the main results in LDA is that LDA decomposes ratio of Between-to-Within covariances, and not the covariance itself having its magnitude (as PCA does).
+
+
+In case of uniformly distributed data, LDA almost always performs better than PCA. However if the data is highly skewed (irregularly distributed) then it is advised to use PCA since LDA can be biased towards the majority class.
+
+Finally, it is beneficial that PCA can be applied to labeled as well as unlabeled data since it doesn't rely on the output labels. On the other hand, LDA requires output classes for finding linear discriminants and hence requires labeled data.
+
+Limitations of Logistic Regression
+Logistic regression is a simple and powerful linear classification algorithm. It also has limitations that suggest at the need for alternate linear classification algorithms.
+
+Two-Class Problems. Logistic regression is intended for two-class or binary classification problems. It can be extended for multi-class classification, but is rarely used for this purpose.
+Unstable With Well Separated Classes. Logistic regression can become unstable when the classes are well separated.
+Unstable With Few Examples. Logistic regression can become unstable when there are few examples from which to estimate the parameters.
+Linear Discriminant Analysis does address each of these points and is the go-to linear method for multi-class classification problems. Even with binary-classification problems, it is a good idea to try both logistic regression and linear discriminant analysis.
+
+This section lists some suggestions you may consider when preparing your data for use with LDA.
+
+Classification Problems. This might go without saying, but LDA is intended for classification problems where the output variable is categorical. LDA supports both binary and multi-class classification.
+Gaussian Distribution. The standard implementation of the model assumes a Gaussian distribution of the input variables. Consider reviewing the univariate distributions of each attribute and using transforms to make them more Gaussian-looking (e.g. log and root for exponential distributions and Box-Cox for skewed distributions).
+Remove Outliers. Consider removing outliers from your data. These can skew the basic statistics used to separate classes in LDA such the mean and the standard deviation.
+Same Variance. LDA assumes that each input variable has the same variance. It is almost always a good idea to standardize your data before using LDA so that it has a mean of 0 and a standard deviation of 1.
+
+
+Multiclass classification with nltk and sklearn
+Imppact of social media on box office
+Nasir safdari
+
+
+KMeans - how to decide the value of k. 
+
+
+from sklearn.ensemble import randomForest, Bagging_classifier
+from sklearn.neighbour import KNN
+
+
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import StandardScaler, Normalizer
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import chi2
+from sklearn.decomposition import PCA
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV
+from sklearn.ensemble import ExtraTreesClassifier,RandomForest, Bagging_classifier
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import VotingClassifier
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import average_precision_score
+from sklearn.metrics import precisionn_recall_score
+
+print(classification_report(y_test, y_pred)
+
+print(confusion_matrix(y_test, predicted))
+
+

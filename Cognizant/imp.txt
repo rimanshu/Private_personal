@@ -1,0 +1,53 @@
+Multiclass classification with nltk and sklearn
+Imppact of social media on box office
+Nasir safdari
+
+NLP and nltk project for text mining
+
+fraud analytics project for claimns 
+
+customer satisfaction scores for banking
+
+Github comments - multiclass class clasification - bug fixing,new requirenment,developement enhancement,production defect.
+
+incident classification on multiclass classfication- Application, database,reporting,Network , Software, Hardware
+
+Customer complaint - debit card, credit card, loan, money transfer, morgague, student loan,
+Forex, virtual currency.
+
+bank marketing - 
+
+KMeans - how to decide the value of k. 
+
+
+from sklearn.ensemble import randomForest, Bagging_classifier
+from sklearn.neighbour import KNN
+
+
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import StandardScaler, Normalizer
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import chi2
+from sklearn.decomposition import PCA
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV
+from sklearn.ensemble import ExtraTreesClassifier,RandomForest, Bagging_classifier
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import VotingClassifier
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import average_precision_score
+from sklearn.metrics import precisionn_recall_score
+
+print(classification_report(y_test, y_pred)
+
+print(confusion_matrix(y_test, predicted))
+
+891 8009673333
+000337095
+
+blue@123
