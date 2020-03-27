@@ -1,0 +1,42 @@
+Git commands --
+
+https://rubygarage.org/blog/most-basic-git-commands-with-examples
+
+git status
+
+git --version
+
+git init - to initilize the empty git repository.
+
+git add . --- stage all files from git folder.
+
+git status --- it will show that changes to be commeted yet.
+
+git commit -m "Version 1"
+
+git log --- to see the changes done by developers.
+
+git config --globle user.name "Rimanshu Mangal"
+
+git config --globle user.email "rimanshu123@gmail.com"
+
+git remote add origin git@github.com:haris989/GIT-Tutorial.git
+
+git push -u origin master
+
+git diff filename --- see the diff from git repository and local
+
+git diff --staged filename -- see the diff git repository and staged.
+
+git reset filename --- to pull file form staged coz i been told to revert changes.
+
+git checkout filename.
+
+git checkout . --- revert back all changed to all file.
+
+git add -A ----- staged all files
+
+git add . ---- staged new and modified, without deleted
+
+git add -u staged modified and deleted, without new. 
+
