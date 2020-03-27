@@ -8,7 +8,12 @@ git --version
 
 git init - to initilize the empty git repository.
 
-git add . --- stage all files from git folder.
+git add . --- stage all files from git folder for that root folder.
+git add --all -- add to satging for a particular project.
+
+git rm --cached my-file.ts -- chached means staging and want to remove from imaginary basket.
+
+git reset another-file.js // unstage or reset the files.
 
 git status --- it will show that changes to be commeted yet.
 
