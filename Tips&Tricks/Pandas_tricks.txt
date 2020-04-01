@@ -1,0 +1,53 @@
+https://github.com/justmarkham/pandas-videos/blob/master/top_25_pandas_tricks.ipynb
+
+1) ohe = OneHotEncoder(handle_unknown='ignore') -For a one-hot encoded feature, what can you do if new data contains categories that weren't seen during training?
+
+2) why some pandas commands ends with parentheses - head(),methods are action oriented and shape,dtype,attribute is who you are.
+
+3) df.columns.str.lower().str.replace(' ', '_') , df.add_prefix('X_'), df.add_suffix('_Y')
+
+4) pd.DataFrame(np.random.rand(4, 8), columns=list('abcdefgh'))
+
+5) drinks.loc[::-1].head() -- reverse rows , drinks.loc[:, ::-1].head() -- reverse column order.
+
+6) drinks.select_dtypes(include=['number', 'object', 'category', 'datetime']).head(), drinks.select_dtypes(exclude='number').head()
+
+7) drinks.info(memory_usage='deep')
+ 
+8) cols = ['beer_servings', 'continent']
+dtypes = {'continent':'category'}
+smaller_drinks = pd.read_csv('http://bit.ly/drinksbycountry', usecols=cols, dtype=dtypes) -- for reduce df size and memory
+smaller_drinks.info(memory_usage='deep')
+
+
+9) from glob import glob
+ stock_files = sorted(glob('data/stocks*.csv'))
+ pd.concat((pd.read_csv(file) for file in stock_files), ignore_index=True)
+ pd.concat((pd.read_csv(file) for file in drink_files), axis='columns').head() --- for column concatenate
+ 
+10) movies[movies.genre.isin(['Action', 'Drama', 'Western'])].head() -- filter using multiple categories
+	movies[~movies.genre.isin(['Action', 'Drama', 'Western'])].head() - opposite of filter
+	
+11) counts = movies.genre.value_counts()
+	counts.nlargest(3)
+	counts.nlargest(3).index
+	movies[movies.genre.isin(counts.nlargest(3).index)].head()
+
+12) ufo.dropna(thresh=len(ufo)*0.9, axis='columns').head() -- drop columns in which more than 10% are missing.
+
+13) orders.groupby('order_id').item_price.agg(['sum', 'count']).head() - for more than one aggregation function.
+
+14) titanic.describe().loc['min':'max'] -- min to max
+
+15) titanic.describe().loc['min':'max', 'Pclass':'Parch'] -- rows and columns
+
+16) titanic.groupby(['Sex', 'Pclass']).Survived.mean().unstack() -- reshape multi index from unstack function.
+
+17) pd.cut(titanic.Age, bins=[0, 18, 25, 99], labels=['child', 'young adult', 'adult']).head(10) -- continious to category
+
+18) format_dict = {'Date':'{:%m/%d/%y}', 'Close':'${:.2f}', 'Volume':'{:,}'}
+	stocks.style.format(format_dict)
+	
+19) pandas_profiling.ProfileReport(titanic) -- pandas profiling
+
+20) 
