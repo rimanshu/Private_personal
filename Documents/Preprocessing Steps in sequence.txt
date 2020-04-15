@@ -1,0 +1,53 @@
+##### Preprocessing Steps before making model ##########
+#https://www.analyticsvidhya.com/blog/2016/01/guide-data-exploration/
+
+Variable Identification - First, identify Predictor (Input) and Target (output) variables. Next, identify the data type and category of the variables.
+
+Univariate Analysis - Method to perform uni-variate analysis will depend on whether the variable type is categorical or continuous.
+In case of continuous variables, we need to understand the central tendency(Mean, Median,Mode,Min,Max) and spread of the variable.
+Univariate analysis is also used to highlight missing and outlier values.Measure of dispersion is Range,Quartile, IQR, Variance, SD, Skewness&Kurtosis
+Visualization method is Histogram and Boxplot.
+
+Categorical Variables:- For categorical variables, we’ll use frequency table to understand distribution of each category. 
+We can also read as percentage of values under each category. It can be be measured using two metrics, Count and Count% against each category. 
+Bar chart can be used as visualization.
+
+Bi-variate Analysis - Bi-variate Analysis finds out the relationship between two variables. We can perform bi-variate analysis for any combination of categorical and continuous variables. 
+The combination can be: Categorical & Categorical, Categorical & Continuous and Continuous & Continuous
+
+Continuous & Continuous: While doing bi-variate analysis between two continuous variables, we should look at scatter plot. 
+It is a nifty way to find out the relationship between two variables. The pattern of scatter plot indicates the relationship between variables. 
+The relationship can be linear or non-linear.Scatter plot shows the relationship between two variable but does not indicates the strength of relationship amongst them
+Correlation would be use in this case and it varies in between -1 to +1 and 0 where no correlation.Correlation = Covariance(X,Y) / SQRT( Var(X)* Var(Y))
+
+Categorical & Categorical: To find the relationship between two categorical variables, we can use two way table and stacked bar chart
+Chi test will be used in this case. Chi-square is based on the difference between the expected and observed frequencies in one or more categories in the two-way table.
+It returns probability for the computed chi-square distribution with the degree of freedom.Probability of 1: It shows that both variables are independent.
+Probability less than 0.05: It indicates that the relationship between the variables is significant at 95% confidence. X2 =(O-E)2/E 
+The chi-square test statistic for a test of independence of two categorical variables is found by: where O is observed and E is Expected.
+
+Categorical & Continuous: While exploring relation between categorical and continuous variables, we can draw box plots for each level of categorical variables. 
+If levels are small in number, it will not show the statistical significance. To look at the statistical significance we can perform Z-test, T-test or ANOVA.
+
+
+Missing values treatment - It is values left during making data or inserting records into table.
+Deletion, fill na with mean, median, and mode, Predictive modeling can also be used in this case. 
+
+Outlier treatment - Data point beyond your data distribution or out of scope data. way to handle is to deletion, Log transformation 
+
+Feature Engineering - Variable transformation, Variable creation
+
+Variable transformation - Normalization Method or Scalling method. Change the scale of features when it is on diff scale. It will not change the shape of variable.
+When we want to convert non linear relationship to linear relationship thne we use Scaling. It mainly used in Linear regression, KNN, Kmnean etc which uses linear
+Distance to predict the output. Theorems which uses linear distnace assumes independent variable is independent to each other and normally distributed.
+Scatter plot can be used to find the relationship between two continuous variables. These transformations also improve the prediction. 
+Log transformation is one of the commonly used transformation technique used in these situations.
+whenever we have a skewed distribution, we can use transformations which reduce skewness. For right skewed distribution, 
+we take square / cube root or logarithm of variable and for left skewed, we take square / cube or exponential of variables.
+Log transformation cannot applied on zero and negative values so we will use square and cube root to handle those cases.
+
+Binning: It is used to categorize variables. It is performed on original values, percentile or frequency. 
+Decision of categorization technique is based on business understanding. For example, we can categorize income in three categories, 
+namely: High, Average and Low. We can also perform co-variate binning which depends on the value of more than one variables.
+
+Variable creation - OHE, Lable encoder and Dummy variables	

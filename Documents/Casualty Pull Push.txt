@@ -1,0 +1,1025 @@
+/*------------------------------------Library----------------------------------------------------------*/
+
+libname sqlconn oracle user='bpsaa' pw='xxxxxxxx' path=EWSOP000 schema=bpsaa buffsize=50000;
+libname dat '/work/ew07/projects/dev/Casualty_Push_Pull/weekly/data';
+libname injtemp '/work/ew07/projects/dev/Casualty_Push_Pull/weekly/tempdata_inj';
+libname final '/work/ew07/projects/dev/Casualty_Push_Pull/weekly/final';
+libname tldtemp '/work/ew07/projects/dev/Casualty_Push_Pull/weekly/tempdata_tld';
+
+/*----------------------------------------------------------------------------------------------------*/
+/* Update run dates */
+/*----------------------------------------------------------------------------------------------------*/
+
+data dat.rundates; 
+format Injury_from_date_format date9.;
+format Injury_to_date_format date9.;
+format TLD_from_date_format date9.;
+format TLD_to_date_format date9.;
+Injury_from_date_Format='05Apr2015'd; 
+Injury_to_date_Format='11Apr2015'd; 
+inj_from_date='05Apr2015'd; 
+inj_to_date='11Apr2015'd;
+TLD_from_date_Format='05Apr2015'd; 
+TLD_to_date_Format='11Apr2015'd; 
+TLD_from_date='05Apr2015'd; 
+TLD_to_date='11Apr2015'd; 
+run; 
+
+/*----------------------------------------------------------------------------------------------------*/
+/* Initial defining of rundates */
+/*----------------------------------------------------------------------------------------------------*/
+
+proc sql;
+select inj_from_date into:inj_from_date from dat.rundates;
+select inj_to_date into:inj_to_date from dat.rundates;	
+select tld_from_date into:tld_from_date from dat.rundates;
+select tld_to_date into:tld_to_date from dat.rundates;		
+quit;
+
+/*---------------------------------------------------------------------------------------------------*/
+					/* Fetching file notes */
+/*----------------------------------------------------------------------------------------------------*/
+proc sql; 
+create table injtemp.file_note_text_copy as 
+select N_FILE_NTE_ID, T_FILE_NTE_DESC, R24_FILE_NOTE_D_LAST_UPDT_TS from sqlconn.file_note_text
+where R24_FILE_NOTE_D_LAST_UPDT_TS >= '14Jun2015'd;
+quit;
+
+/*----------------------------------------------------------------------------------------------------*/
+/* Claims filed for the duration */
+/*----------------------------------------------------------------------------------------------------*/
+
+data injtemp.claims_filed (keep=E45_N_ADW_CLAIM_ID D_REPORTED E45_C_PT_LOSS_ST_CD D_date); 
+set sqlconn.ewt_loss_ng(where=( (&inj_from_date.)<=datepart(d_reported) and (&inj_to_date.)>=datepart(d_reported) )); 
+run;																																																																																													
+
+/*----------------------------------------------------------------------------------------------------*/
+/* Adding claims status and Line of Business */
+/*----------------------------------------------------------------------------------------------------*/
+
+proc sql;
+create table injtemp.claims_auto_prop as
+select distinct a.CUR_CLM_STS_NM,d.*, 
+(case when a.CLM_POL_LINE_CD in ('010', '011', '012', '014', '015', '016', '019', '037', '038', '096') then 'Auto' else 'Prop' end) as LOB
+from sqlconn.EWt_CLM_DIM a , sqlconn.ewt_clm_cov_cd_dim b, sqlconn.EWV_CLM_COV_SNPSHT_FACT_C c, injtemp.claims_filed d
+where a.clm_sk_id = c.CLM_SK_ID and 
+b.clm_cov_cd_sk_id=c.CLM_COV_CD_SK_ID and
+d.E45_N_ADW_CLAIM_ID=a.adw_clm_id and 
+((a.CLM_POL_LINE_CD  in ('010', '011', '012', '014', '015', '016', '019', '037', '038', '096')) or 
+(a.CLM_POL_LINE_CD in ('030', '032', '033', '059', '060', '062', '064', '070', '071', '072', '078', '079', '092', '097') and b.NXTGN_CLM_COV_CD = 'NXX03'));
+run;
+/*5 mins*/
+
+
+/*----------------------------------------------------------------------------------------------------*/
+/* Adding file note id to the claim details where the file note is not system generated */
+/*----------------------------------------------------------------------------------------------------*/
+
+proc sql;
+create table injtemp.filenote_id as
+select distinct a.*,b.C06_SRC_FILE_NTE_ID from injtemp.claims_auto_prop a 
+inner join sqlconn.ewt_file_note b on a.E45_N_ADW_CLAIM_ID=b.C06_ADW_CLAIM_ID and b.C06_SYS_GENR_IND = 'N';
+quit;
+/*49 mins*/
+
+
+/*---------------------------------------------------------------------------------------------------*/
+				/* File notes addition and injury*/
+/*----------------------------------------------------------------------------------------------------*/
+
+
+
+proc sql;
+create table injtemp.claims_filenotes as 
+select distinct a.*, txt.T_FILE_NTE_DESC from injtemp.filenote_id a 
+inner join injtemp.file_note_text_copy txt on a.C06_SRC_FILE_NTE_ID = txt.N_FILE_NTE_ID;
+quit;
+
+/*----------------------------------------------------------------------------------------------------*/
+/* Changing case of dataset and cleaning dataset */
+/*----------------------------------------------------------------------------------------------------*/
+
+data injtemp.filenotes_cleaned (drop = t_file_nte_desc1);
+   set injtemp.claims_filenotes (rename = (t_file_nte_desc = t_file_nte_desc1));
+   t_file_nte_desc = upcase (t_file_nte_desc1);
+   rx1=prxparse("s/<.*?>//");
+   call prxchange(rx1,9999,t_file_nte_desc);
+   t_file_nte_desc=strip(tranwrd(t_file_nte_desc,'&NBSP;',' '));
+   t_file_nte_desc=strip(tranwrd(t_file_nte_desc,'<BR>',' '));
+   t_file_nte_desc = strip(tranwrd(t_file_nte_desc,'&AMP;',' '));
+   t_file_nte_desc=compress(t_file_nte_desc,"-*'=/\`()&;:%","d");
+    t_file_nte_desc=COMPBL(t_file_nte_desc);	
+   drop rx1;
+run;
+
+/*----------------------------------------------------------------------------------------------------*/
+/* Importing keywords to be searched */
+/*----------------------------------------------------------------------------------------------------*/
+DATA dat.flags_keyword_include;
+            LENGTH
+             	root_keyword              $ 15
+                Keywords_include               $ 60 ;
+            FORMAT
+                root_keyword               $CHAR15.
+                Keywords_include               $CHAR60. ;
+            INFORMAT
+                root_keyword               $CHAR15.
+                Keywords_include               $CHAR60. ;
+            INFILE '/work/ew07/projects/dev/Casualty_Push_Pull/Casualty_Prod_0922/data/flags_keyword_include.csv'
+                LRECL=256
+                 ENCODING="LATIN1"
+               DLM='2c'x
+                 MISSOVER
+                 DSD ;
+             INPUT
+                 root_keyword               : $CHAR15.
+                 Keywords_include               : $CHAR60. ;
+RUN;
+
+/*----------------------------------------------------------------------------------------------------*/
+/* Importing keywords that should be ignored */
+/*----------------------------------------------------------------------------------------------------*/
+DATA dat.Keywords_donotinclude; 
+    LENGTH 
+        root_keyword_dni $ 15 
+        Keywords_donotinclude $ 60 ; 
+    FORMAT 
+        root_keyword_dni $CHAR15. 
+        Keywords_donotinclude $CHAR60. ; 
+    INFORMAT 
+        root_keyword_dni $CHAR15. 
+        Keywords_donotinclude $CHAR60. ; 
+    INFILE '/work/ew07/projects/dev/Casualty_Push_Pull/Casualty_Prod_0922/data/Keywords_donotinclude.csv' 
+       LRECL=256 
+             ENCODING="LATIN1" 
+               DLM='2c'x 
+                 MISSOVER 
+                 DSD ; 
+    INPUT 
+        root_keyword_dni : $CHAR15. 
+        Keywords_donotinclude : $CHAR60. ; 
+RUN;
+
+
+/*----------------------------------------------------------------------------------------------------*/
+/* Keywords search query */
+/*----------------------------------------------------------------------------------------------------*/
+proc sql;
+create table injtemp.claims_match_1 as 
+(select a.*, b.Keywords_include, b.root_keyword from injtemp.filenotes_cleaned a
+inner join dat.flags_keyword_include b on t_file_nte_desc like keywords_include);
+quit;
+
+/*----------------------------------------------------------------------------------------------------*/
+/* Keywords that should be ignored */
+/*----------------------------------------------------------------------------------------------------*/
+proc sql;
+create table injtemp.claims_match as
+(select a.*,b.keywords_donotinclude, b.root_keyword_dni
+from injtemp.claims_match_1 a
+left join dat.keywords_donotinclude b 
+on a.t_file_nte_desc like keywords_donotinclude);
+quit;
+
+/*----------------------------------------------------------------------------------------------------*/
+/* Deleting claim details which are false positives */
+/*----------------------------------------------------------------------------------------------------*/
+data injtemp.claims_match;
+set injtemp.claims_match;
+if root_keyword = root_keyword_dni then delete;
+run;
+
+data injtemp.claims_match_BACKUP;
+set injtemp.claims_match;
+RUN;
+
+
+/*----------------------------------------------------------------------------------------------------*/
+/* Flag creation */
+/*----------------------------------------------------------------------------------------------------*/
+proc sql; 
+create table injtemp.keyword_flag as 
+(select  CUR_CLM_STS_NM,
+E45_N_ADW_CLAIM_ID,
+D_REPORTED,
+LOB,
+T_FILE_NTE_DESC,
+KEYWORDS_INCLUDE,
+E45_C_PT_LOSS_ST_CD,
+(case when (t_file_nte_desc) like '%PARALYSIS%' then 1  when (t_file_nte_desc) like '%PARALY%' then 1 when (t_file_nte_desc) like '%PARALI%' then 1
+when (t_file_nte_desc) like '%PARALYZED%' then 1 when (t_file_nte_desc) like '%PARAPLEGIA%' then 1 when (t_file_nte_desc) like '%PARAPLEGIC%' then 1 
+when (t_file_nte_desc) like '%QUADRIPLEGIA%' then 1 when (t_file_nte_desc) like '%QUADRIPELGIC%' then 1 else 0 end ) as F_PARALYSIS,
+(case when (t_file_nte_desc) like '%TRAUMATIC BRAIN INJURY%' then 1 when (t_file_nte_desc) like '%BRAIN INJURY%' then 1 
+when (t_file_nte_desc) like '%TBI %' then 1 when (t_file_nte_desc) like '% TBI.%' then 1 else 0 end ) as F_BRAIN_INJURY,
+(case when (t_file_nte_desc) like '% AMPUT%' then 1 when (t_file_nte_desc) like '%DISMEMBERMENT%' then 1 else 0 end ) as F_DISMEMBERMENT,
+(case when (t_file_nte_desc) like '% COMA %' then 1 when (t_file_nte_desc) like '% COMA.%' then 1  else 0 end ) as F_COMA,
+(case when (t_file_nte_desc) like '%DEATH%' then 1 when (t_file_nte_desc) like '%FATAL%' then 1 when (t_file_nte_desc) like '%DECEASE%' then 1 else 0 end ) as F_DEATH,
+(case when (t_file_nte_desc) like '%OPEN REDUCTION%' then 1 when (t_file_nte_desc) like '%INTERNAL FIXATION%' then 1 when (t_file_nte_desc) like '%ORIF%' then 1  else 0 end ) as F_ORIF, 
+(case when (t_file_nte_desc) like '%CRANIOTOMY%' then 1 else 0 end ) as F_CRANIOTOMY,
+(case when (t_file_nte_desc) like '%SUBARACHNOID HEMORRHAGE%' then 1  
+when (t_file_nte_desc) like '%SUBARACHNOID HEMORAGE%' then 1
+when (t_file_nte_desc) like '%SUBARACHNOID HEMORHAGE%' then 1 
+when (t_file_nte_desc) like '%SUBARACHNOID HEMMORAGE%' then 1 when (t_file_nte_desc) like '%SUBARACHNOID HEMMORRHAGE%' then 1 when (t_file_nte_desc) like '%BRAIN BLEED%' then 1 when (t_file_nte_desc) like '%SUBDURAL HEMATOMA%' then 1 else 0 end ) as F_HEMORRHAGE,
+(case when (t_file_nte_desc) like '%BRACHIAL PLEXUS%' then 1  else 0 end ) as F_BRAC_PLEX,
+(case when (t_file_nte_desc) like '%DROP FOOT%' then 1 when (t_file_nte_desc) like '%PERONEAL NERVE INJURY%' then 1 else 0 end ) as F_DROP_FOOT,
+(case when (t_file_nte_desc) like '% FUSE %' then 1 when (t_file_nte_desc) like '% FUSION%' then 1 when (t_file_nte_desc) like '%ACDF%' then 1 
+when (t_file_nte_desc) like '%ANTERIOR CERVICAL DISCECTOMY FUSION%' then 1 else 0 end ) as F_FUSE,
+(case when (t_file_nte_desc) like '% RSD %' then 1 when (t_file_nte_desc) like '%REFLEX SYMPATHY DISORDER%' then 1 
+when (t_file_nte_desc) like '%REFLEX SYMPATHETIC DISORDER%' then 1 when (t_file_nte_desc) like '%REFLEX SYMPATHETIC DYSTROPHY%' then 1 else 0 end ) as F_RSD,
+(case when (t_file_nte_desc) like '% CRPS %' then 1 when (t_file_nte_desc) like '%COMPLEX REGION PAIN SYNDROME%' then 1 
+when (t_file_nte_desc) like '%COMPLEX REGIONAL PAIN SYNDROME%' then 1 else 0 end ) as F_CRPS
+from injtemp.claims_match);
+quit;
+
+/*----------------------------------------------------------------------------------------------------*/
+/* Rolling up the flags at a claim level */
+/*----------------------------------------------------------------------------------------------------*/
+proc sql;
+create table injtemp.keyword_claims_rollup as
+select E45_N_ADW_CLAIM_ID,LOB,
+max(F_PARALYSIS) as  F_PARALYSIS_1,
+max(F_BRAIN_INJURY) as F_BRAIN_INJURY_1,
+max(F_DISMEMBERMENT) as F_DISMEMBERMENT_1,
+max(F_COMA) as F_COMA_1,
+max(F_DEATH) as F_DEATH_1,
+max(F_ORIF) as F_ORIF_1,
+max(F_CRANIOTOMY) as F_CRANIOTOMY_1,
+max(F_HEMORRHAGE) as F_HEMORRHAGE_1,
+max(F_BRAC_PLEX) as F_BRAC_PLEX_1,
+max(F_DROP_FOOT) as F_DROP_FOOT_1,
+max(F_FUSE) as F_FUSE_1,
+max(F_RSD) as F_RSD_1,
+max(F_CRPS) as F_CRPS_1
+FROM injtemp.keyword_flag
+GROUP BY E45_N_ADW_CLAIM_ID, LOB
+order by E45_N_ADW_CLAIM_ID;
+quit;
+
+/*----------------------------------------------------------------------------------------------------*/
+/* Concatinating the flags */
+/*----------------------------------------------------------------------------------------------------*/
+
+data injtemp.keyword_claims_rollup;
+set injtemp.keyword_claims_rollup;
+if F_PARALYSIS_1=1 then PARALYSIS='|| PARALYSIS' ;
+IF F_BRAIN_INJURY_1=1 THEN BRAININJURY='|| BRAIN INJURY';
+IF F_DISMEMBERMENT_1=1 THEN DISMEMBERMENT='|| DISMEMBERMENT';
+IF F_COMA_1=1 THEN COMA='|| COMA';
+IF F_DEATH_1=1 THEN DEATH='|| DEATH';
+IF F_ORIF_1=1 THEN ORIF='|| ORIF';
+IF F_CRANIOTOMY_1=1 THEN CRANIOTOMY='|| CRANIOTOMY' ;
+IF F_HEMORRHAGE_1=1 THEN HEMORRHAGE='|| HEMORRHAGE';
+IF F_BRAC_PLEX_1=1 THEN BRACPLEX='|| BRACHIAL PLEXUS'; 
+IF F_DROP_FOOT_1=1 THEN DROPFOOT='|| DROP FOOT';
+IF F_FUSE_1=1 THEN FUSE='|| FUSE';
+IF F_CRPS_1=1 then CRPS='|| CRPS';
+IF F_RSD_1=1 then RSD='|| RSD';
+terminator=' ||';
+keywords=trim(CAT(PARALYSIS,BRAININJURY,DISMEMBERMENT,COMA,DEATH,ORIF,CRANIOTOMY,HEMORRHAGE,BRACPLEX,DROPFOOT,FUSE,TLD,CRPS,RSD,terminator));
+drop PARALYSIS BRAININJURY DISMEMBERMENT COMA DEATH ORIF CRANIOTOMY HEMORRHAGE BRACPLEX DROPFOOT FUSE TLD CRPS RSD terminator;
+keywords=compress(keywords,'  ');
+RUN;
+
+/*----------------------------------------------------------------------------------------------------*/
+/* Adding loss date and state */
+/*----------------------------------------------------------------------------------------------------*/
+
+data injtemp.claims_match_unique_clms;
+set injtemp.claims_match;
+run;
+
+proc sort data=injtemp.claims_match_unique_clms nodupkey;
+by E45_N_ADW_CLAIM_ID;
+run;
+
+proc sql;
+create table injtemp.claims_loss_state as 
+(select distinct a.*, b.CUR_CLM_STS_NM, b.E45_C_PT_LOSS_ST_CD, b.d_date, b.d_reported, b.t_file_nte_desc from injtemp.keyword_claims_rollup a 
+inner join injtemp.claims_match_unique_clms b on a.E45_N_ADW_CLAIM_ID=b.E45_N_ADW_CLAIM_ID);
+quit;
+
+data injtemp.claims_loss_state (drop=D_REPORTED D_date);
+set injtemp.claims_loss_state;
+format Loss_date date9.;
+format Loss_report_date date9.;
+FORMAT Loss_state $80. ;
+Loss_date=datepart(d_date);
+Loss_report_date=datepart(D_REPORTED);
+if E45_C_PT_LOSS_ST_CD = "AL" then Loss_state = "Alabama" ;
+else if E45_C_PT_LOSS_ST_CD = "AK" then Loss_state = "Alaska" ;
+else if E45_C_PT_LOSS_ST_CD = "AZ" then Loss_state = "Arizona" ;
+else if E45_C_PT_LOSS_ST_CD = "AR" then Loss_state = "Arkansas" ;
+else if E45_C_PT_LOSS_ST_CD = "CA" then Loss_state = "California" ;
+else if E45_C_PT_LOSS_ST_CD = "CO" then Loss_state = "Colorado" ;
+else if E45_C_PT_LOSS_ST_CD = "CT" then Loss_state = "Connecticut" ;
+else if E45_C_PT_LOSS_ST_CD = "DE" then Loss_state = "Delaware" ;
+else if E45_C_PT_LOSS_ST_CD = "DC" then Loss_state = "District of Columbia" ;
+else if E45_C_PT_LOSS_ST_CD = "FL" then Loss_state = "Florida" ;
+else if E45_C_PT_LOSS_ST_CD = "GA" then Loss_state = "Georgia" ;
+else if E45_C_PT_LOSS_ST_CD = "HI" then Loss_state = "Hawaii" ;
+else if E45_C_PT_LOSS_ST_CD = "ID" then Loss_state = "Idaho" ;
+else if E45_C_PT_LOSS_ST_CD = "IL" then Loss_state = "Illinois" ;
+else if E45_C_PT_LOSS_ST_CD = "IN" then Loss_state = "Indiana" ;
+else if E45_C_PT_LOSS_ST_CD = "IA" then Loss_state = "Iowa" ;
+else if E45_C_PT_LOSS_ST_CD = "KS" then Loss_state = "Kansas" ;
+else if E45_C_PT_LOSS_ST_CD = "KY" then Loss_state = "Kentucky" ;
+else if E45_C_PT_LOSS_ST_CD = "LA" then Loss_state = "Louisiana" ;
+else if E45_C_PT_LOSS_ST_CD = "ME" then Loss_state = "Maine" ;
+else if E45_C_PT_LOSS_ST_CD = "MD" then Loss_state = "Maryland" ;
+else if E45_C_PT_LOSS_ST_CD = "MA" then Loss_state = "Massachusetts" ;
+else if E45_C_PT_LOSS_ST_CD = "MI" then Loss_state = "Michigan" ;
+else if E45_C_PT_LOSS_ST_CD = "MN" then Loss_state = "Minnesota" ;
+else if E45_C_PT_LOSS_ST_CD = "MS" then Loss_state = "Mississippi" ;
+else if E45_C_PT_LOSS_ST_CD = "MO" then Loss_state = "Missouri" ;
+else if E45_C_PT_LOSS_ST_CD = "MT" then Loss_state = "Montana" ;
+else if E45_C_PT_LOSS_ST_CD = "NE" then Loss_state = "Nebraska" ;
+else if E45_C_PT_LOSS_ST_CD = "NV" then Loss_state = "Nevada" ;
+else if E45_C_PT_LOSS_ST_CD = "NH" then Loss_state = "New Hampshire" ;
+else if E45_C_PT_LOSS_ST_CD = "NJ" then Loss_state = "New Jersey" ;
+else if E45_C_PT_LOSS_ST_CD = "NM" then Loss_state = "New Mexico" ;
+else if E45_C_PT_LOSS_ST_CD = "NY" then Loss_state = "New York" ;
+else if E45_C_PT_LOSS_ST_CD = "NC" then Loss_state = "North Carolina" ;
+else if E45_C_PT_LOSS_ST_CD = "ND" then Loss_state = "North Dakota" ;
+else if E45_C_PT_LOSS_ST_CD = "OH" then Loss_state = "Ohio" ;
+else if E45_C_PT_LOSS_ST_CD = "OK" then Loss_state = "Oklahoma" ;
+else if E45_C_PT_LOSS_ST_CD = "OR" then Loss_state = "Oregon" ;
+else if E45_C_PT_LOSS_ST_CD = "PA" then Loss_state = "Pennsylvania" ;
+else if E45_C_PT_LOSS_ST_CD = "RI" then Loss_state = "Rhode Island" ;
+else if E45_C_PT_LOSS_ST_CD = "SC" then Loss_state = "South Carolina" ;
+else if E45_C_PT_LOSS_ST_CD = "SD" then Loss_state = "South Dakota" ;
+else if E45_C_PT_LOSS_ST_CD = "TN" then Loss_state = "Tennessee" ;
+else if E45_C_PT_LOSS_ST_CD = "TX" then Loss_state = "Texas" ;
+else if E45_C_PT_LOSS_ST_CD = "UT" then Loss_state = "Utah" ;
+else if E45_C_PT_LOSS_ST_CD = "VT" then Loss_state = "Vermont" ;
+else if E45_C_PT_LOSS_ST_CD = "VA" then Loss_state = "Virginia" ;
+else if E45_C_PT_LOSS_ST_CD = "WA" then Loss_state = "Washington" ;
+else if E45_C_PT_LOSS_ST_CD = "WV" then Loss_state = "West Virginia" ;
+else if E45_C_PT_LOSS_ST_CD = "WI" then Loss_state = "Wisconsin" ;
+else if E45_C_PT_LOSS_ST_CD = "WY" then Loss_state = "Wyoming" ;
+else if E45_C_PT_LOSS_ST_CD = "AS" then Loss_state = "American Samoa" ;
+else if E45_C_PT_LOSS_ST_CD = "GU" then Loss_state = "Guam" ;
+else if E45_C_PT_LOSS_ST_CD = "MP" then Loss_state = "Northern Mariana Islands" ;
+else if E45_C_PT_LOSS_ST_CD = "PR" then Loss_state = "Puerto Rico" ;
+else if E45_C_PT_LOSS_ST_CD = "VI" then Loss_state = "Virgin Islands" ;
+else if E45_C_PT_LOSS_ST_CD = "UM" then Loss_state = "U.S. Minor Outlying Islands" ;
+else if E45_C_PT_LOSS_ST_CD = "FM" then Loss_state = "Federated States of Micronesia" ;
+else if E45_C_PT_LOSS_ST_CD = "MH" then Loss_state = "Marshall Islands" ;
+else if E45_C_PT_LOSS_ST_CD = "PW" then Loss_state = "Palau" ;
+ELSE Loss_state = E45_C_PT_LOSS_ST_CD;
+run;
+
+
+*/
+libname sqlconn oracle user='bpsaa' pw='xxxxxx' path=EWSOP000 schema=bpsaa buffsize=50000;
+/*-------------------------------------------------------------------------------------*/
+		/*Claims for which CSA and MCO details are required*/
+/*-------------------------------------------------------------------------------------*/
+proc sql;
+create table injtemp.claims_match_subst as 
+select distinct E45_N_ADW_CLAIM_ID from injtemp.claims_auto_prop;
+quit;
+
+/*-------------------------------------------------------------------*/
+/*--Adding csa details*/
+/*-------------------------------------------------------------------*/
+proc sql;
+create table injtemp.claim_csa as
+(SELECT
+  b.M02_CSA_NM as csa,
+  a.M08_CLAIM_NUMBER,
+  a.M08_LAST_UPDATE_T_DT,
+  a.M08_ADW_CLAIM_ID as E45_N_ADW_CLAIM_ID,
+  REVERSE( TRIM(REVERSE((substr(a.M08_CLAIM_NUMBER,3,10)))) ) as clm_nbr
+FROM
+  sqlconn.EWT_CLM_CLAIM_DIM a,
+  sqlconn.EWT_CLM_ORG_UNIT_HST_DIM b
+WHERE
+a.M08_ADW_CLAIM_ID  IN  ( select E45_N_ADW_CLAIM_ID from injtemp.claims_match_subst)
+and
+  ( a.M08_CLM_ALLOC_OFF_SK_ID=b.M02_CLM_ORG_UNIT_SK_ID  ));
+run;
+
+proc sort data=injtemp.claim_csa ;
+by descending E45_N_ADW_CLAIM_ID descending M08_LAST_UPDATE_T_DT ;
+run;
+
+proc sort data=injtemp.claim_csa nodupkey;
+by descending E45_N_ADW_CLAIM_ID;
+run;
+
+data injtemp.claim_csa (drop = CSA1);
+set injtemp.claim_csa (rename = (CSA = CSA1));
+if upcase(csa1)= "ALLSTATE COMMERCIAL" then csa ="ALLSTATE_COMMERCIAL";
+ELSE if upcase(csa1)= "AUTO EXPRESS" then csa ="AUTO_EXPRESS";
+ELSE if upcase(csa1)= "CALIFORNIA" then csa ="CALIFORNIA";
+ELSE if upcase(csa1)= "CAPITAL" then csa ="CAPITAL";
+ELSE if upcase(csa1)= "CATASTROPHE CSA" then csa ="CATASTROPHE_CSA";
+ELSE if upcase(csa1)= "CROSSROADS" then csa ="NORTRH_CENTRAL";
+ELSE if upcase(csa1)= "DENVER CSA" then csa ="WEST_CENTRAL";
+ELSE if upcase(csa1)= "EXPRESS PROPERTY" then csa ="EXPRESS_PROPERTY";
+ELSE if upcase(csa1)= "FLORIDA CSA" then csa ="FLORIDA";
+ELSE if upcase(csa1)= "MED PAY CENTRAL" then csa ="MED_PAY_CENTRAL";
+ELSE if upcase(csa1)= "MIDWEST CSA" then csa ="MIDWEST_CSA";
+ELSE if upcase(csa1)= "NASHVILLE" then csa ="SOUTHERN";
+ELSE if upcase(csa1)= "NEW JERSEY" then csa ="NEW_JERSEY";
+ELSE if upcase(csa1)= "NEW YORK" then csa ="NEW_YORK";
+ELSE if upcase(csa1)= "NORTHEAST" then csa ="NORTHEAST";
+ELSE if upcase(csa1)= "NORTHWEST" then csa ="NORTHWEST";
+ELSE if upcase(csa1)= "SOUTHEASTERN SHORES" then csa ="SOUTHEAST";
+ELSE if upcase(csa1)= "TEXAS" then csa ="TEXAS";
+ELSE if upcase(csa1)= "WESTERN STAR CSA" then csa ="SOUTHWEST";
+ELSE CSA=CSA1;
+run;
+
+proc sort data=injtemp.claim_csa;
+by E45_N_ADW_CLAIM_ID;
+run;
+
+/*----------------------------------------------------------------------------------------------------*/
+/* Getting the count of identified claims for every CSA */
+/*----------------------------------------------------------------------------------------------------*/
+proc sql;
+create table injtemp.csawise_claims_count as
+select csa, count(E45_N_ADW_CLAIM_ID) as num_of_claims from injtemp.claim_csa
+group by csa;
+quit;
+
+proc sort data=injtemp.csawise_claims_count;
+by csa;
+run;
+
+/*-------------------------------------------------------------------*/
+/*--Adding MCO details keywords*/
+/*-------------------------------------------------------------------*/
+proc sql;
+create table injtemp.mco_details as
+(SELECT
+  b.CLM_NBR,
+  b.ADW_CLM_ID as E45_N_ADW_CLAIM_ID,
+  c.COV_OFC_NM as MCO
+FROM
+  sqlconn.EWV_CLM_COV_SNPSHT_FACT_C a,
+  sqlconn.EWV_CLM_DIM b,
+  sqlconn.EWV_COV_ALLOC_OFC_DIM c
+WHERE
+  ( a.CLM_SK_ID=b.CLM_SK_ID  )
+  AND  ( a.CUR_CLM_ALLOC_OFC_SK_ID=c.COV_CLM_OFC_SK_ID  )
+  and   b.CLM_NBR in (select distinct clm_nbr from injtemp.claim_csa));
+quit;
+
+
+
+proc sort data= injtemp.mco_details nodupkey;
+by E45_N_ADW_CLAIM_ID;
+run;
+/*----------------------------------------------------------------------------------------------------*/
+/* Adding claim performer details to the identified claims */
+/*----------------------------------------------------------------------------------------------------*/
+
+proc sql;
+create table injtemp.Claim_owner as SELECT
+  b.OWN_PERFMER_NM,
+  b.OWN_PERFMER_NT_ID,
+  c.ADW_CLM_ID,
+  c.CLM_NBR
+FROM
+  sqlconn.EWV_CLM_COV_SNPSHT_FACT_C a,
+  sqlconn.EWV_PERFMER_CLM_OWN_DIM b,
+  sqlconn.EWV_CLM_DIM c
+WHERE
+  ( a.CLM_SK_ID=c.CLM_SK_ID  )
+  AND  ( b.OWN_CLM_PERFMER_SK_ID=a.CUR_CLMOWN_SK_ID  )
+  AND  
+  c.ADW_CLM_ID  IN  ( select E45_N_ADW_CLAIM_ID from injtemp.claims_match );
+quit;
+
+proc sql;
+create table injtemp.Claim_owner_1 as 
+select distinct OWN_PERFMER_NM, OWN_PERFMER_NT_ID, ADW_CLM_ID from injtemp.Claim_owner;
+quit;
+
+proc sort data=injtemp.Claim_owner_1 nodupkey;
+by ADW_CLM_ID;
+run;
+
+data injtemp.Claim_owner_1(keep = E45_N_ADW_CLAIM_ID claim_owner);
+set injtemp.Claim_owner_1(rename = (adw_clm_id = E45_N_ADW_CLAIM_ID));
+claim_owner=trim(OWN_PERFMER_NM)||" ("||trim(OWN_PERFMER_NT_ID)||")";
+run;
+
+*/
+/*-------------------------------------------------------------------*/
+/*--Merging all the datasets with details*/
+/*-------------------------------------------------------------------*/
+
+data injtemp.claims_match_details;
+merge injtemp.claims_loss_state(in=a) injtemp.claim_csa(in=b) injtemp.mco_details(in=c) injtemp.Claim_owner_1(in=d);
+by E45_N_ADW_CLAIM_ID;
+if a;
+run;
+
+/*-------------------------------------------------------------------*/
+/*--Getting the total number of identified claims*/
+/*-------------------------------------------------------------------*/
+
+proc sql;
+select count(distinct E45_N_ADW_CLAIM_ID) as matched_claims from injtemp.claims_match_details;
+quit;
+
+/*----------------------------------------------------------------------*/
+/*--From here on we will rollup the data to populate the excel templates*/
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/*--Summary tab - Table1*/
+/*----------------------------------------------------------------------*/
+proc sql;
+select count(distinct E45_N_ADW_CLAIM_ID) into:total_clms from injtemp.claims_auto_prop;
+quit;
+
+proc sql;
+create table injtemp.summary_table_1a as
+select &total_clms. as total_clms, count(E45_N_ADW_CLAIM_ID) as matched_clms, sum(F_BRAC_PLEX_1) as Brachial_Plexus,
+sum(F_BRAIN_INJURY_1) as Brain_Injury,sum(F_COMA_1) as Coma, sum(F_CRANIOTOMY_1) as Craniotomy, sum(F_CRPS_1) as CRPS,
+sum(F_DEATH_1) as Fatal, sum(F_DISMEMBERMENT_1) as Amput, sum(F_DROP_FOOT_1) as Peroneal_Nerve_Injury, sum(F_FUSE_1) as Fuse,
+sum(F_HEMORRHAGE_1) as Hemorrrhage, sum(F_ORIF_1) as ORIF, sum(F_PARALYSIS_1) as Paralysis, sum(F_RSD_1) as RSD
+from injtemp.claims_match_details;
+quit;
+
+proc sql;
+create table final.summary_table_1b as
+select total_clms, matched_clms, (matched_clms/total_clms) as pcnt_matched_claims, 
+Paralysis, (Paralysis/matched_clms) as pcnt_Paralysis,
+Brain_Injury, (Brain_Injury/matched_clms) as pcnt_Brain_Injury,
+Amput, (Amput/matched_clms) as pcnt_Amput,
+Coma, (Coma/matched_clms) as pcnt_Coma,
+Fatal, (Fatal/matched_clms) as pcnt_Fatal,
+ORIF, (ORIF/matched_clms) as pcnt_ORIF,
+Craniotomy, (Craniotomy/matched_clms) as pcnt_Craniotomy,
+Hemorrrhage, (Hemorrrhage/matched_clms) as pcnt_Hemorrrhage,
+Brachial_Plexus, (Brachial_Plexus/matched_clms) as pcnt_Brachial_Plexus,
+Peroneal_Nerve_Injury, (Peroneal_Nerve_Injury/matched_clms) as pcnt_Peroneal_Nerve_Injury,
+Fuse, (Fuse/matched_clms) as pcnt_Fuse,
+RSD, (RSD/matched_clms) as pcnt_RSD,
+CRPS, (CRPS/matched_clms) as pcnt_CRPS
+from injtemp.summary_table_1a; 
+quit;
+
+/*----------------------------------------------------------------------*/
+/*--Summary tab - Table2*/
+/*----------------------------------------------------------------------*/
+proc sql;
+select count(distinct E45_N_ADW_CLAIM_ID) into:total_clms_auto from injtemp.claims_auto_prop where lob='Auto';
+quit;
+
+proc sql;
+select count(distinct E45_N_ADW_CLAIM_ID) into:total_clms_prop from injtemp.claims_auto_prop where lob='Prop';
+quit;
+
+proc sql;
+create table injtemp.summary_table_2a as
+select lob,
+(case when lob='Auto' then &total_clms_auto. when lob='Prop' then &total_clms_prop. end) as total_clms, 
+count(E45_N_ADW_CLAIM_ID) as matched_clms, sum(F_BRAC_PLEX_1) as Brachial_Plexus,
+sum(F_BRAIN_INJURY_1) as Brain_Injury,sum(F_COMA_1) as Coma, sum(F_CRANIOTOMY_1) as Craniotomy, sum(F_CRPS_1) as CRPS,
+sum(F_DEATH_1) as Fatal, sum(F_DISMEMBERMENT_1) as Amput, sum(F_DROP_FOOT_1) as Peroneal_Nerve_Injury, sum(F_FUSE_1) as Fuse,
+sum(F_HEMORRHAGE_1) as Hemorrrhage, sum(F_ORIF_1) as ORIF, sum(F_PARALYSIS_1) as Paralysis, sum(F_RSD_1) as RSD
+from injtemp.claims_match_details
+group by lob;
+quit;
+
+proc sql;
+create table final.summary_table_2b as
+select lob,
+total_clms, matched_clms, (matched_clms/total_clms) as pcnt_matched_claims, 
+Paralysis, (Paralysis/matched_clms) as pcnt_Paralysis,
+Brain_Injury, (Brain_Injury/matched_clms) as pcnt_Brain_Injury,
+Amput, (Amput/matched_clms) as pcnt_Amput,
+Coma, (Coma/matched_clms) as pcnt_Coma,
+Fatal, (Fatal/matched_clms) as pcnt_Fatal,
+ORIF, (ORIF/matched_clms) as pcnt_ORIF,
+Craniotomy, (Craniotomy/matched_clms) as pcnt_Craniotomy,
+Hemorrrhage, (Hemorrrhage/matched_clms) as pcnt_Hemorrrhage,
+Brachial_Plexus, (Brachial_Plexus/matched_clms) as pcnt_Brachial_Plexus,
+Peroneal_Nerve_Injury, (Peroneal_Nerve_Injury/matched_clms) as pcnt_Peroneal_Nerve_Injury,
+Fuse, (Fuse/matched_clms) as pcnt_Fuse,
+RSD, (RSD/matched_clms) as pcnt_RSD,
+CRPS, (CRPS/matched_clms) as pcnt_CRPS
+from injtemp.summary_table_2a
+group by lob; 
+quit;
+
+/*----------------------------------------------------------------------*/
+/*--Summary tab - Table3*/
+/*----------------------------------------------------------------------*/
+
+proc sql;
+create table injtemp.summary_table_3a as
+select csa,
+count(E45_N_ADW_CLAIM_ID) as matched_clms, sum(F_BRAC_PLEX_1) as Brachial_Plexus,
+sum(F_BRAIN_INJURY_1) as Brain_Injury, sum(F_COMA_1) as Coma, sum(F_CRANIOTOMY_1) as Craniotomy, sum(F_CRPS_1) as CRPS,
+sum(F_DEATH_1) as Fatal, sum(F_DISMEMBERMENT_1) as Amput, sum(F_DROP_FOOT_1) as Peroneal_Nerve_Injury, sum(F_FUSE_1) as Fuse,
+sum(F_HEMORRHAGE_1) as Hemorrrhage, sum(F_ORIF_1) as ORIF, sum(F_PARALYSIS_1) as Paralysis, sum(F_RSD_1) as RSD
+from injtemp.claims_match_details
+group by csa;
+quit;
+
+proc sort data=injtemp.summary_table_3a;
+by csa;
+run;
+
+data injtemp.summary_table_3b;
+merge injtemp.summary_table_3a(in=a) injtemp.csawise_claims_count(in=b);
+by csa;
+if a;
+run;
+
+proc sql;
+create table final.summary_table_3c as
+select csa, num_of_claims, matched_clms, (matched_clms/num_of_claims) as pcnt_matched_claims, 
+Paralysis, (Paralysis/matched_clms) as pcnt_Paralysis,
+Brain_Injury, (Brain_Injury/matched_clms) as pcnt_Brain_Injury,
+Amput, (Amput/matched_clms) as pcnt_Amput,
+Coma, (Coma/matched_clms) as pcnt_Coma,
+Fatal, (Fatal/matched_clms) as pcnt_Fatal,
+ORIF, (ORIF/matched_clms) as pcnt_ORIF,
+Craniotomy, (Craniotomy/matched_clms) as pcnt_Craniotomy,
+Hemorrrhage, (Hemorrrhage/matched_clms) as pcnt_Hemorrrhage,
+Brachial_Plexus, (Brachial_Plexus/matched_clms) as pcnt_Brachial_Plexus,
+Peroneal_Nerve_Injury, (Peroneal_Nerve_Injury/matched_clms) as pcnt_Peroneal_Nerve_Injury,
+Fuse, (Fuse/matched_clms) as pcnt_Fuse,
+RSD, (RSD/matched_clms) as pcnt_RSD,
+CRPS, (CRPS/matched_clms) as pcnt_CRPS
+from injtemp.summary_table_3b
+group by csa, num_of_claims, matched_clms, pcnt_matched_claims; 
+quit;
+
+/*----------------------------------------------------------------------*/
+/*--Generating dataset for CSA templates*/
+/*----------------------------------------------------------------------*/
+
+proc sql;
+select count(*) into: j from final.summary_table_3c;
+quit;
+
+data injtemp.summary_table_3c_temp;
+set final.summary_table_3c;
+Row_number=_n_;
+run;
+
+data final.claims_match_details_output;
+retain clm_nbr LOB CUR_CLM_STS_NM MCO csa claim_owner Loss_date Loss_report_date Loss_state Keywords t_file_nte_desc;
+set injtemp.claims_match_details(keep=clm_nbr LOB CUR_CLM_STS_NM MCO csa claim_owner Loss_date Loss_report_date Loss_state keywords t_file_nte_desc);
+Num_of_statements = ((count(keywords,'|'))/2)-1;
+run;
+
+/*data claims_match_details_csa_output;*/
+/*set final.claims_match_details_output(drop = csa);*/
+/*run;*/
+
+%macro name(a);
+%do i = 1 %to &j.;
+
+proc sql;
+select csa into: csaname from injtemp.summary_table_3c_temp where row_number = &i.;
+quit;
+ 
+data final.CSA_&csaname. (drop = csa Num_of_statements); 
+set final.claims_match_details_output; 
+where csa= "&csaname.";
+run;
+
+%end;
+%mend name;
+%name(1);
+
+/*proc export data=final.CSA_FLORIDA*/
+/*outfile='/work/ew07/projects/dev/Casualty_Push_Pull/Casualty_Prod_0922/data/CSA.csv'*/
+/*   dbms=csv*/
+/*   replace;*/
+/*run;*/
+
+
+
+*/
+/*-------------------------------------------------------------------*/
+/*--Merging all the datasets with details*/
+/*-------------------------------------------------------------------*/
+
+
+libname sqlconn oracle user='bpsaa' pw='Lopsdfg4' path=EWSOP000 schema=bpsaa buffsize=50000;
+libname dat '/work/ew07/projects/dev/Casualty_Push_Pull/weekly/data';
+libname injtemp '/work/ew07/projects/dev/Casualty_Push_Pull/weekly/tempdata_inj';
+libname final '/work/ew07/projects/dev/Casualty_Push_Pull/weekly/final';
+libname tldtemp '/work/ew07/projects/dev/Casualty_Push_Pull/weekly/tempdata_tld';
+libname major '/work/ew07/projects/dev/Casualty_Push_Pull/weekly/Major_removal';
+libname exp '/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp';
+
+
+data major.claims_match_details;
+set injtemp.claims_match_details;
+run;
+
+
+/*-------------------------------------------------------------------*/
+/*--Delete the claims which are already flagged in tha major audit*/
+/*-------------------------------------------------------------------*/
+
+proc sql;
+delete from major.claims_match_details where clm_nbr in (select claim_number from book1);
+run;
+
+
+proc sql;
+select count(distinct E45_N_ADW_CLAIM_ID) as matched_claims from major.claims_match_details;
+quit;
+
+/*----------------------------------------------------------------------*/
+/*--From here on we will rollup the data to populate the excel templates*/
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/*--Summary tab - Table1*/
+/*----------------------------------------------------------------------*/
+proc sql;
+select count(distinct E45_N_ADW_CLAIM_ID) into:total_clms from injtemp.claims_auto_prop;
+quit;
+
+proc sql;
+create table injtemp.summary_table_1a as
+select &total_clms. as total_clms, count(E45_N_ADW_CLAIM_ID) as matched_clms, sum(F_BRAC_PLEX_1) as Brachial_Plexus,
+sum(F_BRAIN_INJURY_1) as Brain_Injury,sum(F_COMA_1) as Coma, sum(F_CRANIOTOMY_1) as Craniotomy, sum(F_CRPS_1) as CRPS,
+sum(F_DEATH_1) as Fatal, sum(F_DISMEMBERMENT_1) as Amput, sum(F_DROP_FOOT_1) as Peroneal_Nerve_Injury, sum(F_FUSE_1) as Fuse,
+sum(F_HEMORRHAGE_1) as Hemorrrhage, sum(F_ORIF_1) as ORIF, sum(F_PARALYSIS_1) as Paralysis, sum(F_RSD_1) as RSD
+from major.claims_match_details;
+quit;
+
+proc sql;
+create table major.summary_table_1b as
+select total_clms, matched_clms, (matched_clms/total_clms) as pcnt_matched_claims, 
+Paralysis, (Paralysis/matched_clms) as pcnt_Paralysis,
+Brain_Injury, (Brain_Injury/matched_clms) as pcnt_Brain_Injury,
+Amput, (Amput/matched_clms) as pcnt_Amput,
+Coma, (Coma/matched_clms) as pcnt_Coma,
+Fatal, (Fatal/matched_clms) as pcnt_Fatal,
+ORIF, (ORIF/matched_clms) as pcnt_ORIF,
+Craniotomy, (Craniotomy/matched_clms) as pcnt_Craniotomy,
+Hemorrrhage, (Hemorrrhage/matched_clms) as pcnt_Hemorrrhage,
+Brachial_Plexus, (Brachial_Plexus/matched_clms) as pcnt_Brachial_Plexus,
+Peroneal_Nerve_Injury, (Peroneal_Nerve_Injury/matched_clms) as pcnt_Peroneal_Nerve_Injury,
+Fuse, (Fuse/matched_clms) as pcnt_Fuse,
+RSD, (RSD/matched_clms) as pcnt_RSD,
+CRPS, (CRPS/matched_clms) as pcnt_CRPS
+from injtemp.summary_table_1a; 
+quit;
+
+/*----------------------------------------------------------------------*/
+/*--Summary tab - Table2*/
+/*----------------------------------------------------------------------*/
+proc sql;
+select count(distinct E45_N_ADW_CLAIM_ID) into:total_clms_auto from injtemp.claims_auto_prop where lob='Auto';
+quit;
+
+proc sql;
+select count(distinct E45_N_ADW_CLAIM_ID) into:total_clms_prop from injtemp.claims_auto_prop where lob='Prop';
+quit;
+
+proc sql;
+create table injtemp.summary_table_2a as
+select lob,
+(case when lob='Auto' then &total_clms_auto. when lob='Prop' then &total_clms_prop. end) as total_clms, 
+count(E45_N_ADW_CLAIM_ID) as matched_clms, sum(F_BRAC_PLEX_1) as Brachial_Plexus,
+sum(F_BRAIN_INJURY_1) as Brain_Injury,sum(F_COMA_1) as Coma, sum(F_CRANIOTOMY_1) as Craniotomy, sum(F_CRPS_1) as CRPS,
+sum(F_DEATH_1) as Fatal, sum(F_DISMEMBERMENT_1) as Amput, sum(F_DROP_FOOT_1) as Peroneal_Nerve_Injury, sum(F_FUSE_1) as Fuse,
+sum(F_HEMORRHAGE_1) as Hemorrrhage, sum(F_ORIF_1) as ORIF, sum(F_PARALYSIS_1) as Paralysis, sum(F_RSD_1) as RSD
+from major.claims_match_details
+group by lob;
+quit;
+
+proc sql;
+create table major.summary_table_2b as
+select lob,
+total_clms, matched_clms, (matched_clms/total_clms) as pcnt_matched_claims, 
+Paralysis, (Paralysis/matched_clms) as pcnt_Paralysis,
+Brain_Injury, (Brain_Injury/matched_clms) as pcnt_Brain_Injury,
+Amput, (Amput/matched_clms) as pcnt_Amput,
+Coma, (Coma/matched_clms) as pcnt_Coma,
+Fatal, (Fatal/matched_clms) as pcnt_Fatal,
+ORIF, (ORIF/matched_clms) as pcnt_ORIF,
+Craniotomy, (Craniotomy/matched_clms) as pcnt_Craniotomy,
+Hemorrrhage, (Hemorrrhage/matched_clms) as pcnt_Hemorrrhage,
+Brachial_Plexus, (Brachial_Plexus/matched_clms) as pcnt_Brachial_Plexus,
+Peroneal_Nerve_Injury, (Peroneal_Nerve_Injury/matched_clms) as pcnt_Peroneal_Nerve_Injury,
+Fuse, (Fuse/matched_clms) as pcnt_Fuse,
+RSD, (RSD/matched_clms) as pcnt_RSD,
+CRPS, (CRPS/matched_clms) as pcnt_CRPS
+from injtemp.summary_table_2a
+group by lob; 
+quit;
+
+/*----------------------------------------------------------------------*/
+/*--Summary tab - Table3*/
+/*----------------------------------------------------------------------*/
+
+proc sql;
+create table injtemp.summary_table_3a as
+select csa,
+count(E45_N_ADW_CLAIM_ID) as matched_clms, sum(F_BRAC_PLEX_1) as Brachial_Plexus,
+sum(F_BRAIN_INJURY_1) as Brain_Injury, sum(F_COMA_1) as Coma, sum(F_CRANIOTOMY_1) as Craniotomy, sum(F_CRPS_1) as CRPS,
+sum(F_DEATH_1) as Fatal, sum(F_DISMEMBERMENT_1) as Amput, sum(F_DROP_FOOT_1) as Peroneal_Nerve_Injury, sum(F_FUSE_1) as Fuse,
+sum(F_HEMORRHAGE_1) as Hemorrrhage, sum(F_ORIF_1) as ORIF, sum(F_PARALYSIS_1) as Paralysis, sum(F_RSD_1) as RSD
+from major.claims_match_details
+group by csa;
+quit;
+
+proc sort data=injtemp.summary_table_3a;
+by csa;
+run;
+
+data injtemp.summary_table_3b;
+merge injtemp.summary_table_3a(in=a) injtemp.csawise_claims_count(in=b);
+by csa;
+if a;
+run;
+
+proc sql;
+create table major.summary_table_3c as
+select csa, num_of_claims, matched_clms, (matched_clms/num_of_claims) as pcnt_matched_claims, 
+Paralysis, (Paralysis/matched_clms) as pcnt_Paralysis,
+Brain_Injury, (Brain_Injury/matched_clms) as pcnt_Brain_Injury,
+Amput, (Amput/matched_clms) as pcnt_Amput,
+Coma, (Coma/matched_clms) as pcnt_Coma,
+Fatal, (Fatal/matched_clms) as pcnt_Fatal,
+ORIF, (ORIF/matched_clms) as pcnt_ORIF,
+Craniotomy, (Craniotomy/matched_clms) as pcnt_Craniotomy,
+Hemorrrhage, (Hemorrrhage/matched_clms) as pcnt_Hemorrrhage,
+Brachial_Plexus, (Brachial_Plexus/matched_clms) as pcnt_Brachial_Plexus,
+Peroneal_Nerve_Injury, (Peroneal_Nerve_Injury/matched_clms) as pcnt_Peroneal_Nerve_Injury,
+Fuse, (Fuse/matched_clms) as pcnt_Fuse,
+RSD, (RSD/matched_clms) as pcnt_RSD,
+CRPS, (CRPS/matched_clms) as pcnt_CRPS
+from injtemp.summary_table_3b
+group by csa, num_of_claims, matched_clms, pcnt_matched_claims; 
+quit;
+
+/*----------------------------------------------------------------------*/
+/*--Generating dataset for CSA templates*/
+/*----------------------------------------------------------------------*/
+
+proc sql;
+select count(*) into: j from major.summary_table_3c;
+quit;
+
+data injtemp.summary_table_3c_temp;
+set major.summary_table_3c;
+Row_number=_n_;
+run;
+
+data major.claims_match_details_output;
+retain clm_nbr LOB CUR_CLM_STS_NM MCO csa claim_owner Loss_date Loss_report_date Loss_state Keywords t_file_nte_desc;
+set major.claims_match_details(keep=clm_nbr LOB CUR_CLM_STS_NM MCO csa claim_owner Loss_date Loss_report_date Loss_state keywords t_file_nte_desc);
+Num_of_statements = ((count(keywords,'|'))/2)-1;
+run;
+
+
+data major.claims_match_details_output(drop = Num_of_statements); 
+set major.claims_match_details_output;
+run;
+
+/*data claims_match_details_csa_output;*/
+/*set final.claims_match_details_output(drop = csa);*/
+/*run;*/
+
+%macro name(a);
+%do i = 1 %to &j.;
+
+proc sql;
+select csa into: csaname from injtemp.summary_table_3c_temp where row_number = &i.;
+quit;
+ 
+data major.CSA_&csaname. (drop = csa); 
+set major.claims_match_details_output; 
+where csa= "&csaname.";
+run;
+
+%end;
+%mend name;
+%name(1);
+
+proc export data=major.csa_med_pay_central
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/csa_med_pay_central.csv'   dbms=csv
+   replace;
+run;
+
+proc export data=major.csa_allstate_commercial
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/csa_allstate_commercial.csv'   dbms=csv
+   replace;
+run;
+
+proc export data=major.csa_auto_express
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/csa_auto_express.csv'   dbms=csv
+   replace;
+run;
+
+proc export data=major.csa_california
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/csa_california.csv'   dbms=csv
+   replace;
+run;
+
+proc export data=major.csa_capital
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/csa_capital.csv'   dbms=csv
+   replace;
+run;
+
+proc export data=major.CSA_FLORIDA
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/csa_florida.csv'   dbms=csv
+   replace;
+run;
+
+proc export data=major.csa_midwest_csa
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/csa_midwest_csa.csv'   dbms=csv
+   replace;
+run;
+
+proc export data=major.csa_new_jersey
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/csa_new_jersey.csv'   dbms=csv
+   replace;
+run;
+
+proc export data=major.csa_new_york
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/csa_new_york.csv'   dbms=csv
+   replace;
+run;
+
+proc export data=major.csa_northeast
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/csa_northeast.csv'   dbms=csv
+   replace;
+run;
+
+proc export data=major.csa_northwest
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/csa_northwest.csv'   dbms=csv
+   replace;
+run;
+
+proc export data=major.csa_north_central
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/csa_north_central.csv'   dbms=csv
+   replace;
+run;
+
+
+proc export data=major.csa_southeast
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/csa_southeast.csv'   dbms=csv
+   replace;
+run;
+
+
+proc export data=major.csa_southern
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/csa_southern.csv'   dbms=csv
+   replace;
+run;
+
+
+proc export data=major.csa_southwest
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/csa_southwest.csv'   dbms=csv
+   replace;
+run;
+
+
+proc export data=major.csa_texas
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/csa_texas.csv'   dbms=csv
+   replace;
+run;
+
+
+
+proc export data=major.csa_west_central
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/csa_west_central.csv'   dbms=csv
+   replace;
+run;
+
+proc export data=major.csa_catastrophe_csa
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/csa_catastrophe.csv'   dbms=csv
+   replace;
+run;
+
+proc export data=major.claims_match_details_output
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/claims_match_details_output.csv'   dbms=csv
+   replace;
+run;
+
+/*Repeat it thrice for summary sheets  */
+proc export data=injtemp.summary_table_1b
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/summary_table_1a.csv'   dbms=csv
+   replace;
+run;
+
+
+proc export data=injtemp.summary_table_2b
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/summary_table_2a.csv'   dbms=csv
+   replace;
+run;
+
+
+proc export data=injtemp.summary_table_3c
+outfile='/work/ew07/projects/dev/Casualty_Push_Pull/weekly/exp/summary_table_3a.csv'   dbms=csv
+   replace;
+run;
+
