@@ -1,0 +1,95 @@
+Ganguly Tech
+https://rubygarage.org/blog/most-basic-git-commands-with-examples
+https://gist.github.com/bradtraversy/f407d642bdc3b31681bc7e56d95485b6
+https://www.youtube.com/watch?v=dnKmf5W9_sg&list=PLNHw_0qv1zy86nW1as5-hqOO-8GWnqu2y&index=18
+
+use mongo_test -- to make new database or switch to database.
+show dbs
+db -- to check the current database
+
+db.mongo_test.insert({"name":"Rimanshu Mangal",
+    "city": "Noida",
+    "color": ["Green","Yellow"]}) // one way to create collections
+
+db.createCollection("Users",{
+    "capped" : true,
+    "Size" : 4512456,
+    "autoIndexId" : true
+    })  // Its another way to create collections or table. One dictionary belongs to one document.
+
+db.mongo_test.find() // its like select query in sql
+db.dropDatabase() // drop the database which is currently running.
+show collections // to see collections or tables.
+
+db.Users.drop() // drop collections
+you cannot insert one or more documents with id values.
+
+Multiple documents insert in mongo -----
+db.Users.insert([{
+    "User":"Python",
+    "Year":2019
+    },{
+        "User":"ML",
+        "Year":2017,
+        "like": "likewise"
+        }])
+
+Multiple data types in mongo database
+db.Users.insert({
+    "User" : "Multiple Datatype",
+    "date" : Date(),
+    "Course" : {
+        "name" : "mongodb tutorials",
+        "price": 0,
+        "view" : 123456
+        },
+     "bool" : true,
+     "empty" : null
+    })
+
+Filter Conditions in Mongo db 
+db.find().pretty() // formated rows.
+db.posts.find().count() // counts of rows.
+db.posts.findOne({ category: 'News' })
+db.posts.find({$text: {$search: "\"Post O\""})
+
+db.Users.find({"User":"NoSQL","year":2020}) // filter according to keys
+db.Users.find({"User":"NoSQL","year": {$lte : 2020}}) 
+db.Users.find({"User":"NoSQL","year": {$gte : 2019}})// lte - lessthanequalto
+db.Users.find({"User":"NoSQL","year": {$ne : 2019}}) // ne means not equal
+db.Users.find({"User":"NoSQL","year": {$gt : 2019, $lte : 2020}}) 
+
+
+db.Users.find({$and : [{"User": "Python"},{"Year":2019}]})
+db.Users.find({$or : [{"User": "Python"},{"Year":2019}]})
+db.Users.find({$and : [{"User": "Python"},{"Year":{$lte: 2019}}]}) // multiple operations
+
+
+Delete documents 
+db.Users.remove({"like": "likewise"})
+db.Users.remove() // remove all documents
+db.Users.remove({"like": "likewise"}, 1) // delete one document if one or more have likewise value withs same columns.
+
+select column in tables.
+db.Users.find({}, {"User" : 1, "year" : 1, "_id": 0}) // 0 means dont want to see, 1 means you want see that column.
+
+
+Limit, skip and sort in mongo db
+
+db.Users.find().limit(2) // limit the documents 
+db.Users.find().limit(2).skip(1) // you can use skip and limit pahle and bad main.
+db.Users.find().sort({"User" : 1}) // 1 for acsending and -1 is for descending
+
+
+Update the documents and records 
+
+db.Users.update({"year" : 2020}, {$set : {"User": "NoSql"}}, {multi : true}) // multi means it will update all the records
+or documents where year is 2020 with the same value.
+db.posts.update({ title: 'Post Two' },{$inc: {likes: 5}})
+db.posts.update({ title: 'Post Two' },{$rename: {likes: 'views'}})
+
+Indexing and backup in mongo db
+
+db.Users.ensureIndex({"User": 1}) // User_1 name created index where 1 is acsending order.
+db.posts.createIndex({ title: 'text' })
+mongodump to take backup and mongorestore to restore the data
