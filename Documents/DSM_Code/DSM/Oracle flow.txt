@@ -1,0 +1,43 @@
+Flow of oracle code
+
+1. Check count of dsm_base_payments table(generally around 18 million)
+2. Check count of distinct payment id's which should be the same as the above count.
+3. Check output table  for all payee employee name matches from old output.
+4. Create a new table called dsm_name_match to select payment id's for all rows in which payee_employee_name_match ='Y'
+5. Check count of the table(around 23000)
+6. Check count of dsm_oct_output(Should be around 18 million)
+7. Check count of table when source is 'DSM'
+8. Check count of table when source is 'IFM'
+9. Check count of distinct payment id's.This value should be the same value we got for source = DSM
+10. Check all rows in the table where model score is greater than 1. This should return no values.
+11. Add column d_issue_date from ewt_payment_ng to output table.
+12. Verify count of output table, count of DSM rows and count of IFM rows. The count should be the same
+13. Create a table dsm_oct_auth_11 with columns :
+	1. Authorizers performer alpha id
+	2. Authorizing performer's name
+	3. Authorizing performer's title
+	4. Authoritiies current record indicator
+	5. All columns from output table.
+Also,for all null values in the first four columns mentioned, replace with "auth not required."
+14.Create a new table.Keep only distinct payment ids which are repeated more than once and where authorizing performer is involved
+15. Aggregate all authorizer's alpha id's,authorizer's performer names, authorizer's title and order them by payment id and alpha id
+16. Merge the new table with dsm_oct_auth_11 and update the authorizing performer alpha_id, name and title from the new table
+17. Keep only distinct records
+18. From dsm_oct_output table select only those records fro which issue date is from the last two months.
+19. Check the counts.
+20. Create new table dsm_jun_loss_exp and create new column to classify c_fin_tx_entry_type into loss payment, expenxe payment, loss payment offset, expense payment offset.
+21. Check counts.
+22. Create new table dsm_jun_loss_exp_2 and aggregate the loss expense indicator by grouping by payment id   
+23. Check count.
+24. Create new table unit_dsm_1_oct2014 and selecti issuer title, issuer name, issuer deactivation date and the difference between d_issue date and issuer_proces_ts.
+25. Keep the rows where difference is the least for particular payment id and performer id.
+26. Check counts
+27. Add columns issuer current performer team name, and issuer title to dsm_oct_output file
+28.  Check counts and for all rows where source = IFM , set performer team and performer title equal to legacy payment
+29. to this table add another column with concatenated tax id's of all participants for the claim.
+30. Set employe street, city,region,zip,standard address to null when employee first name and last name is missing
+31. Add columns authorizers alpha id, name,title to this table and set as legacy payments for all IFM payments.
+32. Add column loss expense indicator and issuer title to table
+33. Add columns for payee employee name match , employee address match, payee payer name match to the table.
+34. Rename all columns in the table to the appropriate names as in the tableau extract.
+
