@@ -1,0 +1,30 @@
+Hi This is Rimanshu and currently working in genpact as data scientist. I have total 5.5 years of experinece in IT industry in which more than 3.5 years in particularly in Machine Learning, NLP, Predictive modeling using python as programming language. I have got good amount of exposire in Data warehousing tools like ETL and Tableau. I have worked on integration project and Data migration project using ETL and datawarehousing concepts. I have good understanding in SQL and UNIX. My current is developeming a feature in product and then integrate with saleforce using rest API and then deploy the product for client. I have made CICD pipelines using devops for deployment also.
+
+
+Intent classification 
+FILE NAME','FILE TYPE','WORK TYPE','WORK SUBTYPE','EMAIL SUBJECT, Business Unit, 'Region'
+
+Entity Extraction through email - We have maintained config files for each language to detect the entity.We support 11 langauges.
+We have made teach and learn feature also for entity extraction and CI.
+
+EE T&L - If any header or keyword will not match with config_files then it will add in new json with all details in appending manner. At the end of the day we will send those keywords to Salesforce to review keywords so that they will accept and reject thorugh UI and it will automatically update our config files. Teach manually feature is alo there to reject the same.
+
+Customer Identification 
+Business wanted to predict the cusomer number and Customer name according to payment details for a particular account
+Customer name is company name like ABC oil ltd , phillips and all.
+
+Features - 
+Account_number	Currency	Payment_details	Customer_name	Customer_number
+
+Libraries - multiprocessing, Flask, Sqlalchemy, json
+
+Accenture - Text Mining and Casualty Push and Pull, ETL, Tableau (property insurance dashboard.). oracle
+Cognizant (service solution and analytics SSA internal team) - Service now ticket automation with multilable and multiclass classiification.
+			Time series use case. like machine usecase.
+			server poc.
+			Customer segmentation
+			AR at risk - Snowflake and Postgres
+			
+Genpact - TCA product with Entity extraction , Teach and Learn and Customer Identification with T&L
+		with end to end design to product implementation and pipeline and release with making wheelfile.
+		AHD - automatic help desk where intent classification, Postgres, Mysql and redshift.
