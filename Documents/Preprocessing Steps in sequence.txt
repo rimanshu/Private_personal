@@ -38,7 +38,7 @@ Outlier treatment - Data point beyond your data distribution or out of scope dat
 Feature Engineering - Variable transformation, Variable creation
 
 Variable transformation - Normalization Method or Scalling method. Change the scale of features when it is on diff scale. It will not change the shape of variable.
-When we want to convert non linear relationship to linear relationship thne we use Scaling. It mainly used in Linear regression, KNN, Kmnean etc which uses linear
+When we want to convert non linear relationship to linear relationship then we use Scaling. It mainly used in Linear regression, KNN, Kmnean etc which uses linear
 Distance to predict the output. Theorems which uses linear distnace assumes independent variable is independent to each other and normally distributed.
 Scatter plot can be used to find the relationship between two continuous variables. These transformations also improve the prediction. 
 Log transformation is one of the commonly used transformation technique used in these situations.
