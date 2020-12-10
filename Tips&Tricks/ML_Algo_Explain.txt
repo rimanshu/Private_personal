@@ -1,0 +1,12 @@
+Logistic Regression - Features Linearly seperable, Logistic Regression requires average or no multicollinearity between independent variables.,
+
+Random Forest - It is good for Imbalance Data, Handling of huge amount of data, No problem of overfitting, Useful to extract feature importance.
+XG Boost - Works on error/learning rate. Less feature engineering required (No need for scaling, normalizing data, can also handle missing values well). Fast to interpret. Feature importance can be found out(it output importance of each feature, can be used for feature selection). Handles large sized datasets, Good Execution , Good model performance, 
+Support Vector Machine - High Dimentional Data with small dataset. Best algorithm when classes are separable.  Poor performance with Overlapped classes. Mostly works well in text classification.
+
+ SELECT B.BusName,B.MNTH,CAST(B.LD TO DECIMAL(10,2)),CAST(A.WIND AS DECIMAL (10,2)),A.WIND/B.LD from windload A
+ inner join (select BusName, MONTH(Datetime_obs) MNTH, Max(Load) LD from windload where MONTH(Datetime_obs) =6 group by MONTH(Datetime_obs), BusName
+ )B 
+ on A.BusName = B.BusName
+ AND MONTH(A.Datetime_obs) = B.MNTH
+ AND A.LOAD =B.LD

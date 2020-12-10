@@ -1,0 +1,78 @@
+Your task is to structure and propose a data science project to tackle claims fraud in the auto insurance subsector, this task is designed to help us understand if you are able to learn quickly, understand the industry in which you will be working as well as your ability to use data science knowledge and skills to propose solutions to some problems you might be faced if you are successful in securing this role.
+
+Deliverables (in Power Point: 5 to 8 slides):
+
+Structure of the project
+Data requirement brief (What data would you need to model and detect fraudulent claims, assume you are able to obtain any data you require)
+Assumptions and proposed models (Proposal of the type of models you plan to use in this project, some justification of the model selection) 
+User case (Present 1 use case out of research that you think could be applied to our company)
+Project timeframe estimations (Please structure your workload, plan coding work needed and let us know how long do you think will take you to do this project)
+
+This task is purely theoretical and you are not required to present a POC, neither to code any models. At the end of the day, this is your proposal and you will need to convince us that this project is worth investing in.
+
+-----------------------------------------------------------------------------
+1) Config file and Pickle Folder, Retraining folder, Training Folder, Prediction Folder, Hyperparameter Tuning , Requirement.txt
+2) Feature names - Vehicle Model Year, Vehicle Model name(Toyota, Honda, Chevrolet, Ford), Vehicle Size (('Compact', 'Midsize', 'Luxury')), Payment type or method (EFT, Manual, Cash), Loss state code, Loss date, DATE_OF_REPORT, Coverage code, Inception date , Settlement date, Inception method (field, online, Agent), Payment amount, Annual_Premium, Claim_Amount, Claim Cause, Claim report type (Agent, Callcenter, Branch), Policy Holder education (High School, College, Bachelor, Master, Doctor), Employement status (Employed, Unemployed, Retired), Gender(M,F), Income, Marital status (Married', 'Single', 'Divorced'), Months_Since_Last_Claim, months_as_customer,witnesses, police_report_available, Fraudulent_Claim
+
+Claim Cause- (Earthquake,Fire, Theft, Head-on collision, Insured hit a fixed object, Insured Hit An Animal, Flood, Hail, Scratch/Dent, Other)
+
+1) Vehicle Details would be needed like Vehicle Model Year, Vehicle Model name(Toyota, Honda, Chevrolet, Ford), Vehicle Size (('Compact', 'Midsize', 'Luxury'))
+2)Policy Detail like Coverage, Annual Premium, Policy Holder education (High School, College, Bachelor, Master, Doctor), Employement status (Employed, Unemployed, Retired), Gender(M,F), Income, Marital status (Married', 'Single', 'Divorced'), Months_Since_Last_Claim, months_as_customer
+3)Claim Detail like Loss state code, Loss date, DATE_OF_REPORT,Inception date , Settlement date, Inception method (field, online, Agent), witnesses, police_report_available
+
+1) Data Could be Imbalance and Machine Learning Model could show baisness.
+2) Try to reduce misclassification (True positive and False Positive)
+3) Model training time should be less.
+
+Hypothesis
+These variables appear to be the best for detecting fraudulent claims:
+
+Claim Amount - Uncommonly high claim amounts are more likely to be fraudulent.
+Claim Cause - The more severe claim causes (fire , collision and earthquake) will be less likely to be fraudulent.
+Claim Report Type - Fraud claims will be reported with as little human interaction as possible.
+Employment Status - Claimants who are not currently employed are more likely to report fraudulent claims.
+Income - The higher the level of education, the less likely reports are to be fraudulent. (This may also be linked with income)
+Vehicle Model Year - Older Vehicle likely to have fraudulent
+
+3) Models - Logistic regression and Random Forest.
+4) One use case that can be to detect the fraud in Auto insurance claims. Frauds are unethical and are losses to the company. By building a model that can classify auto insurance fraud, I am able to cut losses for the insurance company. Less losses equates to more earning.
+
+Insurance fraud is a deliberate deception perpetrated against or by an insurance company or agent for the purpose of financial gain. Fraud may be committed at different points in the transaction by applicants, policyholders, third-party claimants, or professionals who provide services to claimants. Insurance agents and company employees may also commit insurance fraud. Common frauds include “padding,” or inflating claims; misrepresenting facts on an insurance application; submitting claims for injuries or damage that never occurred; and staging accidents.
+
+5) I will take 7 to 10 days of time to Design, Development,integrate, Testing and deployment the project so that client can use in real-time application. First 2 days will take to get requirements and data from client and basic on given data. Next 4 days (Excluding Model run time) to make POC on given data which includes Data Preprocessing, hyperparameter tuning and several ML model implementation to see performance matrix. Next 1 day to discuss the POC and Performance matrix and get finalize from the help of client/manager. One day will take unit testing for developer end. If client want to deploy it in production so this will take 2 days to expose the REST API and struture the project in proper Manner to deploy on server.
+
+
+1) Config Files
+2) Pickle Files
+3) Retraining
+4) Data Preprocessing
+5) Training
+6) Hyperparameter Tuning
+7) Requirement.txt
+8) Setup File
+9) Read.md
+
+
+
+
+
+Please read the below problem statement and answer the questions concisely.
+
+James, the Head of Supply Chain for a large India based consumer Electronics Company XYZ, was in a conundrum. And he needed help! XYZ  outsources it’s manufacturing to a set of South East Asian contract manufacturers and then packages the products and sells them to Retailers. For few products, James has been observing that the goods procured and received from many  of the  Contract Manufacturers, were lower than  the ordered quantity. Checking back with the Contract Manufacturers and post an audit, he was assured that the companies were shipping out the correct quantities but few of the product were ‘lost’ in the shipment process. A detailed investigation using the services of a third party resulted in identifying the reasons for the lost shipment – theft, wrong tagging at transit warehouses and few more.
+ 
+James has figured out that he ended up spending Rs.35 lakhs on the audit process and has been incurring an average loss of Rs.1 Crore every quarter on the lost shipment, as finance had to write-off the amount lost in the shipment process. James wanted to reduce these spending by using the power of analytics to identify products that were most likely to get lost in the future transactions. James learnt from his IT team that roughly on an average there were 10,00,000 products procured per quarter and  around 10,000  were lost during transit.
+
+--------------------------------------------------------------------------------------------------------------
+Deliverables:
+Please provide concise responses in a Word Document for the below questions.
+
+Briefly describe the business problem and analytical problem. (max 5 sentences)
+
+Provide examples of 3 Hypothesis that you may test as part of your exploratory study. Feel free
+ to assume as required. (3 Hypothesis) --- Correlation (1st Chi sqaured test) , Drop Null, Multicolinarity.
+ Shipment Mode (Air, Ocean, Truck, Train), Pack Price, 
+ 
+Provide example of 3 Algorithms that you may use for model building. What is your justification for using these algorithms based on the given context? (max 10 sentences)
+
+
+

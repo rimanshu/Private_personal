@@ -1,0 +1,29 @@
+What is the difference between Pandas series and Python lists? - indexing is not present in list
+Diffrence between assigment, copy and deep copy - copy will not prevent nested change.
+What Are The Key Features Of pandas Library? - Data Alignment, Memory Efficient, Reshaping, Merge and join, Time Series
+Categorical datatype in Pandas - to save memory and can make logical order
+Pickling and Unpickling - process whereby a Python object hierarchy is converted into a byte stream. It is known as serialization, marshalling, or flattening.
+How memory is managed in Python? - It has private heap sapace and own garbage collector.
+Python decorator - run the some piece of code at run time. Defined by @property.
+How are arguments passed by value or by reference? - need to see more
+What is Dict and List comprehensions are?
+
+Summing up, apply works on a row / column basis of a DataFrame, applymap works element-wise on a DataFrame, and map works element-wise on a Series.
+
+map is defined on Series ONLY
+applymap is defined on DataFrames ONLY
+apply is defined on BOTH
+Second major difference: INPUT ARGUMENT
+
+map accepts dicts, Series, or callable
+applymap and apply accept callables only
+
+Difference between Merge join and concat
+
+how to find out name whose start with B. Substring and between operator
+
+
+
+python working
+
+

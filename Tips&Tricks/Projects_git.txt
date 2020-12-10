@@ -1,0 +1,39 @@
+https://www.youtube.com/watch?v=YCg8FmDdZLI&list=PLQOD1TSbIfgQMu8jr2OVhKeHTu5pGAfNV&index=12    - Linear regression
+
+
+https://github.com/rimanshu/Machine-Learning-with-Python/blob/master/Click-Through%20Rate%20Prediction.ipynb
+https://github.com/rimanshu/Machine-Learning-with-Python/blob/master/Customer_Segmentation_Online_Retail.ipynb
+https://github.com/rimanshu/Machine-Learning-with-Python/blob/master/Consumer_complaints.ipynb
+https://github.com/rimanshu/udacity/blob/master/MLND/boston_housing/boston_housing.ipynb
+https://github.com/rimanshu/Machine-Learning-with-Python/blob/master/Ease_of_Business.ipynb
+https://github.com/rimanshu/Loan_Prediction/blob/master/New_analysis.ipynb
+https://github.com/rimanshu/ML-Projects/blob/master/Haberman%20Cancer%20Survival.ipynb
+
+https://github.com/rimanshu/Customer-Analytics/blob/master/Customer%20Analytics.ipynb imp
+
+----------------------------------Ritkesh------------------------------
+
+https://github.com/rimanshu/Data-Science-and-Machine-Learning-Projects/blob/master/Linear%20Regression/ECommerce_Company_analysis.ipynb
+https://github.com/rimanshu/regression-python/blob/master/Air%20Quality%20-%20Machine%20Learning/air_quality_regression.ipynb  -- Ritkesh
+https://github.com/rimanshu/Bank-Marketing-Data-Analysis/blob/master/Classification%20ML%20Model.ipynb   -- Ritkesh
+https://github.com/rimanshu/Bank-Marketing-Campaign-Analysis/blob/master/Bank_Marketing_Project.ipynb -- Ritkesh
+https://github.com/rimanshu/MLProjects/blob/master/Predict%20Customer%20Happiness/Customer%20Happiness.ipynb - Ritkesh
+https://github.com/rimanshu/Flight-Recommedation/blob/master/Air%20Fair%20Price%20Recommendation%20System.ipynb -- Ritkesh with states library
+https://github.com/rimanshu/Loan_Prediction/blob/master/New_analysis.ipynb -- Loan Prediction
+
+-----------------------Rimanshu-------------------------
+https://github.com/rimanshu/Customer-Analytics/blob/master/Customer%20Analytics.ipynb
+https://github.com/rimanshu/machine-learning-case-studies/tree/master/stackoverflow_tag_preditor -- IMP and quora usecase
+https://github.com/rimanshu/Flight-Recommedation/blob/master/Air%20Fair%20Price%20Recommendation%20System.ipynb -- states library
+https://github.com/rimanshu/Loan_Prediction/blob/master/New_analysis.ipynb
+https://github.com/rimanshu/Bank-Marketing-Data-Analysis/blob/master/Classification%20ML%20Model.ipynb
+https://github.com/rimanshu/MLCompetitions/blob/master/News%20Analysis/notebooks/02%20Model%20Building.ipynb --- strong library
+https://github.com/rimanshu/bank-customer-churn-python/blob/master/Bank%20Customer%20Churn_2.ipynb  --- 
+
+
+
+
+
+
+
+
