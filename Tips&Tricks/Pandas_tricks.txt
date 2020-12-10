@@ -50,4 +50,5 @@ smaller_drinks.info(memory_usage='deep')
 	
 19) pandas_profiling.ProfileReport(titanic) -- pandas profiling
 
-20) 
+20) df.where(df['Age']>34) to filter out data.
+
