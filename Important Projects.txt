@@ -10,3 +10,15 @@
 10) https://github.com/rimanshu/MLProjects/tree/master/Predict%20Customer%20Happiness
 11) https://github.com/rimanshu/machine-learning-case-studies - quora and stack over flow
 12)https://github.com/rimanshu/PythonDataScienceHandbook/tree/master/notebooks --- very Very Important
+13) https://github.com/rimanshu/Customer-Analytics/blob/master/Customer%20Analytics.ipynb  ---- Most imp
+
+
+------------------------- Deep Learning ------------------------------
+
+1) https://github.com/rimanshu/Fake-New-LSTM
+2) https://github.com/rimanshu/deep-learning-with-python-notebooks/blob/master/3.7-predicting-house-prices.ipynb
+3) https://github.com/rimanshu/deep-learning-with-python-notebooks/blob/master/6.4-sequence-processing-with-convnets.ipynb
+4) https://github.com/rimanshu/deep-learning-with-python-notebooks/blob/master/3.6-classifying-newswires.ipynb
+5) https://github.com/rimanshu/udacity/blob/master/DLND/dog_breed_classifier/dog_app.ipynb
+6) https://github.com/rimanshu/Real-time-ML-Project
+7) https://towardsdatascience.com/classify-toxic-online-comments-with-lstm-and-glove-e455a58da9c7
