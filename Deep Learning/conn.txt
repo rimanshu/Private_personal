@@ -1,0 +1,203 @@
+import cx_Oracle
+
+dsn_tns = cx_Oracle.makedsn('server', 'port', service_name='service_name')
+#dsn = cx_Oracle.makedsn(host, port, sid) 
+conn = cx_Oracle.connect(user='username', password='password', dsn=dsn_tns)
+cursor = conn.cursor()
+#cursor.execute('select count(*) from TABLE_NAME')
+query = "SELECT * FROM MYTABLE"
+cursor.execute(query)
+resultSet=cursor.fetchall()
+connection.close()
+
+# for row in c:
+#    print(row)
+# conn.close()
+
+
+import pandas as pd
+import sqlalchemy
+
+import sqlalchemy
+db = sqlalchemy.create_engine('postgresql:///tutorial.db')
+from sqlalchemy import create_engine
+engine = create_engine('postgresql+psycopg2://user:password@hostname/database_name')
+conn = engine.connect()
+conn.execute("SELECT host FROM INFORMATION_SCHEMA.PROCESSLIST WHERE ID = CONNECTION_ID()").fetchall()
+
+import cx_Oracle
+conn= cx_Oracle.connect('username/pwd@host:port/service_name')
+try:
+    query = '''
+         SELECT * from dual
+             '''
+    df = pd.read_sql(con = conn, sql = query)
+finally:
+    conn.close()
+df.head()
+##########################################################################
+engine = create_engine('oracle://scott:tiger@127.0.0.1:1521/sidname')
+df=pd.read_sql("Customers",engine)
+
+###############
+df=pd.read_sql_query(query,engine, chunksize=) # chunksize will be used when we want to read huge data in chunks.
+df=pd.read_sql_table(table_name,engine)
+df=pd.read_sql(query or table_name, engine)
+
+#To load the data in database 
+df.to_sql(name='customers', conn=engine, index=False, if_exists='append') # if_exists - fail, replace, append
+
+
+# Mongo DB Connection
+from pymongo import MongoClient
+client = MongoClient() 
+client = MongoClient(‘host’, port_number) 
+example:- client = MongoClient(‘localhost’, 27017)
+client = MongoClient(“mongodb://localhost:27017/”)
+
+
+#!/usr/bin/python
+
+hostname = 'localhost'
+username = 'USERNAME'
+password = 'PASSWORD'
+database = 'DBNAME'
+
+# Simple routine to run a query on a database and print the results:
+def doQuery( conn ) :
+    cur = conn.cursor()
+
+    cur.execute( "SELECT fname, lname FROM employee" )
+
+    for firstname, lastname in cur.fetchall() :
+        print firstname, lastname
+
+
+print "Using psycopg2…"
+import psycopg2
+myConnection = psycopg2.connect( host=hostname, user=username, password=password, dbname=database )
+doQuery( myConnection )
+myConnection.close()
+
+print "Using PyGreSQL…"
+import pgdb
+myConnection = pgdb.connect( host=hostname, user=username, password=password, database=database )
+doQuery( myConnection )
+myConnection.close()
+This example creates a series of Connection objects that opens the same database using different PostgreSQL modules. Because both of these modules use the portable SQL database API interface, they are able to use the code in the doQuery() function without any modifications.
+
+#!/usr/bin/python
+
+import pg
+
+conn = pg.DB(host="localhost", user="USERNAME", passwd="PASSWORD", dbname="DBNAME")
+
+result = conn.query("SELECT fname, lname FROM employee")
+
+for firstname, lastname in result.getresult() :
+    print firstname, lastname
+
+conn.close()
+
+
+import snowflake.connector
+# Connecting to Snowflake using the default authenticator
+con = snowflake.connector.connect(
+  user=USER,
+  password=PASSWORD,
+  account=ACCOUNT,
+)
+
+# Querying Data
+cur = con.cursor()
+try:
+    cur.execute("SELECT col1, col2 FROM testtable")
+    for (col1, col2) in cur:
+        print('{0}, {1}'.format(col1, col2))
+finally:
+    cur.close()
+
+# Creating database, schema and warehouse if not exists
+con.cursor().execute("CREATE WAREHOUSE IF NOT EXISTS tiny_warehouse")
+con.cursor().execute("CREATE DATABASE IF NOT EXISTS testdb")
+con.cursor().execute("USE DATABASE testdb")
+con.cursor().execute("CREATE SCHEMA IF NOT EXISTS testschema")
+
+# Using Database, Schema and Warehouse
+con.cursor().execute("USE warehouse tiny_warehouse")
+con.cursor().execute("USE testdb.testschema")
+
+# Creating Table and Inserting Data
+con.cursor().execute(
+    "CREATE OR REPLACE TABLE "
+    "testtable(col1 integer, col2 string)")
+con.cursor().execute(
+    "INSERT INTO testtable(col1, col2) "
+    "VALUES(123, 'test string1'),(456, 'test string2')")
+
+# Putting Data
+con.cursor().execute("PUT file:///tmp/data/file* @%testtable")
+con.cursor().execute("COPY INTO testtable")
+
+# Copying Data
+con.cursor().execute("""
+COPY INTO testtable FROM s3://<your_s3_bucket>/data/
+    CREDENTIALS = (
+        aws_key_id='{aws_access_key_id}',
+        aws_secret_key='{aws_secret_access_key}')
+    FILE_FORMAT=(field_delimiter=',')
+""".format(
+    aws_access_key_id=AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=AWS_SECRET_ACCESS_KEY))
+
+
+
+
+import boto
+import boto.s3.connection
+access_key = 'put your access key here!'
+secret_key = 'put your secret key here!'
+
+conn = boto.connect_s3(
+        aws_access_key_id = access_key,
+        aws_secret_access_key = secret_key,
+        host = 'objects.dreamhost.com',
+        #is_secure=False,               # uncomment if you are not using ssl
+        calling_format = boto.s3.connection.OrdinaryCallingFormat(),
+        )
+
+#LISTING OWNED BUCKETS
+for key in bucket.list():
+        print "{name}\t{size}\t{modified}".format(
+                name = key.name,
+                size = key.size,
+                modified = key.last_modified,
+                )
+        
+        
+#CREATING A BUCKET
+bucket = conn.create_bucket('my-new-bucket')
+
+#LISTING A BUCKET’S CONTENT
+for key in bucket.list():
+        print "{name}\t{size}\t{modified}".format(
+                name = key.name,
+                size = key.size,
+                modified = key.last_modified,
+                )
+        
+#DELETING A BUCKET
+conn.delete_bucket(bucket.name)
+
+#CREATING AN OBJECT
+key = bucket.new_key('hello.txt')
+key.set_contents_from_string('Hello World!')
+
+#DOWNLOAD AN OBJECT (TO A FILE)
+key = bucket.get_key('perl_poetry.pdf')
+key.get_contents_to_filename('/home/larry/documents/perl_poetry.pdf')
+
+#DELETE AN OBJECT
+bucket.delete_key('goodbye.txt')
+
+
