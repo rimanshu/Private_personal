@@ -22,3 +22,5 @@
 5) https://github.com/rimanshu/udacity/blob/master/DLND/dog_breed_classifier/dog_app.ipynb
 6) https://github.com/rimanshu/Real-time-ML-Project
 7) https://towardsdatascience.com/classify-toxic-online-comments-with-lstm-and-glove-e455a58da9c7
+
+https://towardsdatascience.com/9-awesome-python-packages-for-machine-learning-that-should-deserve-more-credit-dbad17263145
