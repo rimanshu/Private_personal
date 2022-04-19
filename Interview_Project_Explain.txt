@@ -1,0 +1,68 @@
+Hi,
+
+Please find the write-up about my roles and responsilities.
+
+I am working with HCl Digital as Senior data scientist handling a product team of 5 people. I have total 7 years of experience in IT industry in which more 
+than 5 years in particularly in python, Machine Learning, NLP and predictive modeline, deep learning using python as programming language. 
+I am having an expereince of end to end life cycle of data science which includes design, development, integrating and deploying onto multiple server.
+I also has an experience on streamlit framework which we can make UI for models.
+I worked with product based department as well as service based client. I also got good amount of exposure in Data Warehousing tools like Abinitio (ETL tool) and 
+Tableau (Reporting tool). I have good understanding of RDMS and Nosql along with Unix as scripting langauge.
+
+Cage Risk project -
+
+Features of cage risk - origin country, dim_volume_metric, package type code, description, customer value, dang_good code, dest country, hs6code,
+location_cd, frequency, dwell time, dim weight
+
+parametrs - 140 trees, max tree depth 20, minimum sample leaf 10, minimumsample to split 30, feature sampling strategy auto, 
+
+recall 75, precision 54, f1 64, accuracy 73, auc 81
+
+Genpact Roles and Responsibilites :-
+
+We made a product build on Salesforce which drives from Machine Learning and NLP techniques at backend. This is cashless application in which 
+we have automated the lifecycle of customer request in form of email. Emails contains inforamtion of invoice like refund , discount and gift money 
+compansated. We have done end to end integration of ML services to salesforce through Flask as REST API. Whole ML application is deployed at 
+AWS EC2 machine through CICD Pipelines and Release made by us only. This deployement process includes code checks like unittest cases, bandit ,
+sonar vulnerabilities and quality checks and making wheel/Tar file of whole application which will be further install at respective servers 
+through PIP.
+
+There are mainy three features of this product are as follows - 
+
+1) Entity Extraction - We extracts the entity from the email (email body, html, csv, excel and pdf as attachemnt) send by the customer and send back to the salesforce with some calculations/manipulation sugessted by business. We supports 12 languages for this produuct. We have used NLP techniques (nltk, textblob, spacy), beautifulsoup, pyMUF, Pandas and many more libraries.
+2) Customer Identification - We predict the top 5 customer with their confidence score according to payment details send by business. We have used cosine similarity techniques and Random Forest modeling to achieve this capability. 
+3) Teach and Learn - We have given customer to retrain the model by their own and add/remove true positive and false positive entities to database to optimize the product as per their requirement. Customer can do the same from Salesfoce UI which will hit the ML service at back end.
+
+Other Roles and Responsibilities - 
+
+1) Have involved data migration project from on-premises database(Teradata) to cloud datawarehouse(Snowflake) Using Python, ETL, Aws S3 bucket.
+2) Made few ETL batch jobs to update the date warehouse and database for banking and insurance industry.
+3) Made some tableau dashboard to visualise the property casualty insurance which helps to get fast decision by business.
+
+Ar at risk - columns name is average dpd(done bucketing) , close date, due date, rating, region, total AR, promised amount, disputed amount, balaced amount, invoice status(closed), Transaction code(INV). make column from date like month, quater
+hyper parameter tuining.
+learning rate - .4, max depth - 4 , n_estimator=1000, class_weight =balance
+
+AHD - It has two steps one is predict the email is escalation email or not if it is not escalation email then find out it is 
+status email or manual resolution. XGBoost
+
+Escialtion email are predict from random forest. It will find email is status email or not depending on question dictionary like 
+can you please, can we, i need to know, please advise. Along with payment, invoice, status these kind of keywords.
+Manual resolution involves keywords like cancle, stop, what, correct, why, issue , process etc. Sentance tokenize thorugh 
+english. pickle nltk library. Language detection through text blob.
+
+Features - 
+Account_number	Currency	Payment_details	Customer_name	Customer_number
+
+Libraries - multiprocessing, Flask, Sqlalchemy, json
+
+Accenture - Text Mining and Casualty Push and Pull, ETL, Tableau (property insurance dashboard.). oracle
+Cognizant (service solution and analytics SSA internal team) - Service now ticket automation with multilable and multiclass classiification.
+			Time series use case. like machine usecase.
+			server poc.
+			Customer segmentation
+			AR at risk - Snowflake and Postgres
+			
+Genpact - TCA product with Entity extraction , Teach and Learn and Customer Identification with T&L
+		with end to end design to product implementation and pipeline and release with making wheelfile.
+		AHD - automatic help desk where intent classification, Postgres, Mysql and redshift.

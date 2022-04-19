@@ -1,6 +1,6 @@
 # Escape sequence character and print statement.
 
-print("Printing first line", end ="") # by default end ="\n"
+print("Printing first line","Second Line will be seperated by space", end ="") # by default end ="\n"
 print("Printing second line")
 print("Printing first line","Printing second line") #printing two statement in same print.
 print("He is \n good boy \t Rimanshu")

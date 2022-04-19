@@ -1,5 +1,5 @@
 #diamond shape problem is that problem occur on multiple inheritance where it might confuse that which method or variable needs
-# to call. Python and C== can handle that but Java doesnt have multiple inretance.
+# to call. Python and C++ can handle that but Java doesnt have multiple inretance.
 
 class A:
     def met(self):

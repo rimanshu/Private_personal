@@ -59,5 +59,7 @@ print(d2.keys())
 print(d2.items())
 print(d2.values())
 
+print([1,2]-[1,3])
+
 
 

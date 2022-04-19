@@ -6,6 +6,13 @@ How can you create Empty NumPy Array In Python? import numpy numpy.array([])
 What is Enumerate() Function in Python? 
 subjects = (‘Python’, ‘Interview’, ‘Questions’)
 
+Difference between genartor and iterotor:
+
+To create iterator we use iter() and to generator we use function along with yield keyword
+Generator uses the yield keyword. It saves the local variable
+Generator in python helps us top write fast and compact code
+Python iterator is much more memory efficient
+
 for i, subject in enumerate(subjects):
 print(i, subject)
 
