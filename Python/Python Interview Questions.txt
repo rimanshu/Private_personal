@@ -8,6 +8,8 @@ subjects = (‘Python’, ‘Interview’, ‘Questions’)
 
 Difference between genartor and iterotor:
 
+Genrator will not print all elements in once. it will save and print from next function. Iterator will print all
+element in one short. You can save ram from genrators. Genrators can be iterate only once.
 To create iterator we use iter() and to generator we use function along with yield keyword
 Generator uses the yield keyword. It saves the local variable
 Generator in python helps us top write fast and compact code

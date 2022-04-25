@@ -21,7 +21,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
-  <component name="RunManager" selected="Python.2_list_dictionary_others">
+  <component name="RunManager" selected="Python.6.1_diamond_multipleinheritance">
     <configuration name="2_list_dictionary_others" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="python_basic" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -43,7 +43,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="7_operator overloading,special methods" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="6.1_diamond_multipleinheritance" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="python_basic" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -55,7 +55,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/7_operator overloading,special methods.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/6.1_diamond_multipleinheritance.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -129,11 +129,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.6.1_diamond_multipleinheritance" />
         <item itemvalue="Python.2_list_dictionary_others" />
         <item itemvalue="Python.Lambda,Map,Filter,Reduce functions." />
         <item itemvalue="Python.deco, gen and yeild function" />
         <item itemvalue="Python.8_arguments" />
-        <item itemvalue="Python.7_operator overloading,special methods" />
       </list>
     </recent_temporary>
   </component>
