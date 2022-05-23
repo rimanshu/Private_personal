@@ -4,15 +4,19 @@ Please find the write-up about my roles and responsilities.
 
 I am working with HCl Digital as Senior data scientist handling a product team of 5 people. I have total 7 years of experience in IT industry in which more 
 than 5 years in particularly in python, Machine Learning, NLP and predictive modeline, deep learning using python as programming language. 
-I am having an expereince of end to end life cycle of data science which includes design, development, integrating and deploying onto multiple server.
+I am having an expereince of end to end life cycle of data science which includes design, development, integrating and deploying onto multiple cloud server.
 I also has an experience on streamlit framework which we can make UI for models.
 I worked with product based department as well as service based client. I also got good amount of exposure in Data Warehousing tools like Abinitio (ETL tool) and 
 Tableau (Reporting tool). I have good understanding of RDMS and Nosql along with Unix as scripting langauge.
+
+I worked in agile methology since 3 years.
 
 Cage Risk project -
 
 Features of cage risk - origin country, dim_volume_metric, package type code, description, customer value, dang_good code, dest country, hs6code,
 location_cd, frequency, dwell time, dim weight
+
+cage reason - recency, document type
 
 parametrs - 140 trees, max tree depth 20, minimum sample leaf 10, minimumsample to split 30, feature sampling strategy auto, 
 
@@ -39,7 +43,8 @@ Other Roles and Responsibilities -
 2) Made few ETL batch jobs to update the date warehouse and database for banking and insurance industry.
 3) Made some tableau dashboard to visualise the property casualty insurance which helps to get fast decision by business.
 
-Ar at risk - columns name is average dpd(done bucketing) , close date, due date, rating, region, total AR, promised amount, disputed amount, balaced amount, invoice status(closed), Transaction code(INV). make column from date like month, quater
+Ar at risk - columns name is average dpd(done bucketing) , close date, due date, rating, region, total AR, promised amount, disputed amount,
+balaced amount, invoice status(closed), Transaction code(INV). make column from date like month, quater
 hyper parameter tuining.
 learning rate - .4, max depth - 4 , n_estimator=1000, class_weight =balance
 
