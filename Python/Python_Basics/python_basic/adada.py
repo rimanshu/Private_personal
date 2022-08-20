@@ -1,3 +1,12 @@
+import pandas as pd
+
+data = {'Name': ['Tom', 'Tom', 'krish', 'jack'], 'Age': [20, 21, 19, 18]}
+
+# Create DataFrame
+df = pd.DataFrame(data)
+print(df.groupby('Name').mean())
+
+
 # import json,log
 # from jsonschema import validate
 #
