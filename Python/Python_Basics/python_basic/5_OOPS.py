@@ -1,5 +1,5 @@
 # main function .......
-# when we inport the library or other file then it will execute the whole fucntions present in files.
+# when we import the library or other file then it will execute the whole fucntion present in files.
 def test():
     print("testing")
 print("value of __name__ is ...........",__name__) # it will the __main__ value when run from this file.

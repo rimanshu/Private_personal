@@ -32,5 +32,5 @@ def fibonaci_series(n):
     else:
         return fibonaci_series(n-1) + fibonaci_series(n-2)
 
-resutl12=fibonaci_series(num12)
+resutl12=fibonaci_series(5)
 print("Fibonacii series using Recursive method ....",resutl12)
