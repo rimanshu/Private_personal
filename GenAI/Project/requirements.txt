@@ -1,0 +1,9 @@
+langchain_openai 
+langchain_core
+python-dotenv
+streamlit
+langchain_community
+sentence_transformers
+pypdf
+chromadb
+faiss-cpu

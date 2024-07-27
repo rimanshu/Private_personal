@@ -6,8 +6,8 @@ import streamlit as st
 # Load your API key from environment variables
 load_dotenv()
 
-os.getenv("")
-genai.configure(api_key=os.getenv(""))
+os.getenv("AIzaSyDEUTYKIk1ccdeIxjOgqySjDXi8ACF0d0c")
+genai.configure(api_key=os.getenv("AIzaSyDEUTYKIk1ccdeIxjOgqySjDXi8ACF0d0c"))
 
 credential_path = "C:\Users\riman\VSCode\GenAI_Projects\GenAI\Krish_GenAI\Gemini\model-augury-425401-r0-6775bf279613.json"
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credential_path
