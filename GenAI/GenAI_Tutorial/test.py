@@ -24,8 +24,6 @@ completion = client.chat.completions.create(
 print(completion.choices[0].message)
 
 
--------------------------------------------------------------
-
 # llama2 model code.
 
 from langchain.llms import PromptTemplate

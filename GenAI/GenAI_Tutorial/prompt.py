@@ -12,7 +12,7 @@ prompt = PromptTemplate(
 
 prompt.format(financial_concept ='income tax')
 
-llm = (temperature=0.7)
+llm = openai(temperature=0.1)
 
 chain1 = LLM_Chain(llm=llm, prompt=prompt)
 
